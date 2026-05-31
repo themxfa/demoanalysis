@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FaceAid AI - Promo Generator</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- VARIABLES --- */
+        :root {
+            --bg-primary:   #161640;
+            --bg-body:      #161640;
+            --bg-secondary: #1e1e4a;
+            --bg-tertiary:  #323272;
+            --bg-gradient:  radial-gradient(circle at 50% 0%, #6655aa 0%, #3a2e75 35%, #221d52 55%, #141230 80%);
+            --fg-primary:   #FFFFFF;
+            --fg-secondary: #A0A3AD;
+            --fg-muted:     #6B6D78;
+            --accent:       #a855f7;
+            --accent-hover: #9333ea;
+            --border:       rgba(255, 255, 255, 0.1);
+            --shadow-md:    0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0px rgba(255, 255, 255, 0.04);
+            --font-main:    'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* --- GLOBAL RESETS --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        *::-webkit-scrollbar { display: none !important; }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--fg-primary);
+            min-height: 100vh;
+            font-family: var(--font-main);
+            font-weight: 400;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Background Gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-gradient);
+            z-index: -1;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+            width: 100%;
+        }
+
+        header { text-align: center; margin-bottom: 2rem; }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            margin-bottom: 0.5rem;
+            color: var(--fg-primary);
+            outline: none;
+        }
+
+        /* --- EDITABLE TEXT FIELDS --- */
+        [contenteditable="true"] {
+            outline: none;
+            cursor: text;
+            transition: background 0.2s;
+            border-radius: 6px;
+        }
+        [contenteditable="true"]:hover {
+            background: rgba(255,255,255,0.03);
+        }
+        [contenteditable="true"]:empty::before {
+            content: attr(data-placeholder);
+            color: rgba(255,255,255,0.2);
+            pointer-events: none;
+        }
+
+        /* --- PREVIEW IMAGE (UPLOAD/DRAG) --- */
+        .preview-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .preview-image-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .preview-image-container:hover {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .preview-image-container.has-image {
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .upload-placeholder {
+            color: var(--fg-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .upload-placeholder i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+            display: none;
+        }
+
+        /* --- RESULT BOX --- */
+        .result-box {
+            position: relative;
+            background-color: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 2rem 2rem 1.75rem;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            overflow: visible;
+        }
+
+        /* --- EXACT COPY BUTTON STYLING --- */
+        .top-copy-btn {
+            position: absolute;
+            top: -18px;
+            right: 1.5rem;
+            background-color: var(--bg-secondary);
+            color: var(--fg-secondary);
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 10;
+            opacity: 1;
+            width: 36px;
+            height: 36px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .top-copy-btn:hover {
+            background-color: #2a2a3e;
+            color: var(--fg-primary);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .top-copy-btn i {
+            font-size: 1.1rem;
+        }
+
+        /* --- RESULT CONTENT & TEXT --- */
+        .result-content {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            display: block;
+        }
+
+        /* Base Paragraph text */
+        .ai-line {
+            line-height: 1.5;
+            font-size: 1.05rem;
+            color: var(--fg-primary);
+            margin-top: 0;
+            margin-bottom: 0.6rem;
+            white-space: pre-wrap;
+        }
+
+        /* Main Purple Heading */
+        .ai-line.is-header {
+            font-size: 1.65rem;
+            font-weight: 700;
+            margin-bottom: 0 !important; /* Zero margin to tighten gap */
+            margin-top: 1.25rem;
+            color: var(--accent);
+            letter-spacing: -0.02em;
+            line-height: 1.2; /* Tightened line-height */
+        }
+        .ai-line.is-header:first-child {
+            margin-top: 0 !important;
+        }
+
+        /* Bold White Sub-Heading */
+        .ai-line.is-sub-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--fg-primary);
+            margin-bottom: 0.05rem !important;
+            margin-top: 0 !important; /* Removed all top margin */
+            line-height: 1.3;
+        }
+
+        /* Highlight Styling for Live Markdown formatting */
+        .highlight-bold {
+            font-weight: 700;
+            color: var(--fg-primary);
+        }
+        em {
+            font-style: italic;
+        }
+        
+        @media(max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .container { padding: 2rem 1rem; }
+            .result-box { padding: 2rem 1.5rem; }
+            .ai-line { font-size: 1.02rem; }
+            .ai-line.is-header { font-size: 1.25rem; }
+            .ai-line.is-sub-header { font-size: 1.1rem; }
+        }
+
+        @media(max-width: 480px) {
+            h1 { font-size: 1.75rem; }
+            .result-box { padding: 1.75rem 1.25rem; }
+            .preview-image-container { width: 180px; height: 180px; }
+            
+            .top-copy-btn {
+                top: -18px;
+                right: 1rem;
+                padding: 0.4rem;
+                width: 34px;
+                height: 34px;
+            }
+            .top-copy-btn i {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Editable Page Title -->
+        <header>
+            <h1 contenteditable="true" spellcheck="false">Your Analysis Results</h1>
+        </header>
+
+        <!-- Clickable / Drag&Drop Image Area -->
+        <div class="preview-section" id="previewSection">
+            <div class="preview-image-container" id="dropzone">
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                    <i class="fa-solid fa-cloud-arrow-up"></i><br>
+                    Click or Drag Image
+                </div>
+                <img id="previewImage" class="preview-image" src="" alt="Your Image">
+            </div>
+        </div>
+
+        <!-- Fully Editable Results Container -->
+        <div class="results-container">
+            <div class="result-box" id="resultBox">
+                
+                <!-- THE ORIGINAL COPY BUTTON -->
+                <button class="top-copy-btn" title="Copy to clipboard" contenteditable="false">
+                    <i class="fa-regular fa-clipboard"></i>
+                </button>
+
+                <div id="resultContent" class="result-content">
+                    
+                    <!-- Pre-filled Section 1 -->
+                    <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Face Shape Analysis</h3>
+                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">The Square Structure</div>
+                    <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Based on the facial mapping, you have a strongly defined jawline with balanced cheekbones, revealing a classic structured <span class="highlight-bold">square face shape</span>. This structure provides a highly masculine foundation for versatile styling.</p>
+
+                    <!-- Pre-filled Section 2 -->
+                    <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Best Hairstyles</h3>
+                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Volume is Key</div>
+                    <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Because of your sharp structure, opt for styles that add volume on top while keeping the sides tight. A <em>textured modern fringe</em>, a classic pompadour, or a neat skin fade will complement your facial proportions perfectly.</p>
+
+                    <!-- Pre-filled Section 3 -->
+                    <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Custom Skincare Routine</h3>
+                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Hydration Focused</div>
+                    <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Your skin appears to have a combination profile with slight signs of dehydration around the lower cheeks. 
+1. Use a gentle hydrating cleanser every morning.
+2. Incorporate a Vitamin C serum to even out the tone.
+3. Finish with a lightweight moisturizer and an invisible SPF 50.</p>
+
+                    <!-- Pre-filled Section 4 -->
+                    <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Colors & Style</h3>
+                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Deep & Bold Contrast</div>
+                    <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Your contrast level and cool undertones mean you look exceptionally well in jewel tones. Build your wardrobe around deep navy blues, emerald greens, and charcoal grays to make your features stand out effortlessly.</p>
+
+                    <!-- Pre-filled Section 5 -->
+                    <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Grooming Advice</h3>
+                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Emphasizing The Jawline</div>
+                    <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Keep your beard trimmed to a neat 3-5mm stubble. This enhances the shadow on your jawline without hiding your strong natural bone structure. Apply a few drops of beard oil daily to prevent dry skin underneath.</p>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic for Image Upload and Clean Pasting / Live Markdown -->
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const previewImage = document.getElementById('previewImage');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+        // Trigger file select on click
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        // Handle Drag & Drop styling
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.style.borderColor = 'var(--accent)';
+            dropzone.style.background = 'rgba(255, 255, 255, 0.1)';
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            if(!dropzone.classList.contains('has-image')) {
+                dropzone.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            }
+            dropzone.style.background = 'rgba(255, 255, 255, 0.03)';
+        });
+
+        // Handle Drop
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        // Handle File Input Selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Load the image into the container and center crop it
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                uploadPlaceholder.style.display = 'none';
+                dropzone.classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* ----------------------------------------------------
+           LIVE MARKDOWN & PASTE ENGINE
+        ----------------------------------------------------- */
+
+        function applyMarkdown(text) {
+            // Protect bold markers temporarily to avoid italic clash
+            text = text.replace(/\*\*(.*?)\*\*/g, '___B___$1___/B___');
+            // Apply Italic
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // Restore Bold as HTML
+            text = text.replace(/___B___(.*?)___\/B___/g, '<span class="highlight-bold">$1</span>');
+            return text;
+        }
+
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            
+            // 1. Paste formatting
+            el.addEventListener('paste', function(e) {
+                e.preventDefault();
+                let text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                
+                // Escape HTML tags from pasted text so it doesn't break layout
+                text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                
+                // Apply Markdown to pasted text
+                text = applyMarkdown(text);
+                
+                // Convert newlines to HTML breaks
+                text = text.replace(/\n/g, '<br>');
+                
+                // Insert directly at cursor
+                document.execCommand('insertHTML', false, text);
+            });
+
+            // 2. Live typing formatting
+            el.addEventListener('keyup', function(e) {
+                // Ignore arrow keys to not interrupt normal navigation
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+                
+                let html = this.innerHTML;
+                
+                // Trigger only if there's an asterisk
+                if (html.includes('*')) {
+                    
+                    // Count to ensure we only format when the pair is fully closed
+                    const boldCount = (html.match(/\*\*/g) || []).length;
+                    const italicCount = (html.replace(/\*\*/g, '').match(/\*/g) || []).length;
+                    
+                    if (boldCount % 2 === 0 && italicCount % 2 === 0) {
+                        
+                        // Drop an invisible marker where the typing cursor currently is
+                        let sel = window.getSelection();
+                        if (!sel.rangeCount) return;
+                        let range = sel.getRangeAt(0);
+                        let marker = document.createElement('span');
+                        marker.id = 'caret-marker';
+                        range.insertNode(marker);
+                        
+                        // Grab the HTML (now including the marker) and apply markdown formatting
+                        let htmlWithMarker = this.innerHTML;
+                        let formattedHtml = applyMarkdown(htmlWithMarker);
+                        
+                        if (htmlWithMarker !== formattedHtml) {
+                            this.innerHTML = formattedHtml;
+                        }
+                        
+                        // Find the marker, place the cursor right after it, and delete the marker
+                        let restoredMarker = document.getElementById('caret-marker');
+                        if (restoredMarker) {
+                            let newRange = document.createRange();
+                            newRange.setStartAfter(restoredMarker);
+                            newRange.collapse(true);
+                            sel.removeAllRanges();
+                            sel.addRange(newRange);
+                            restoredMarker.remove();
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
