@@ -6,14 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FaceAid AI - Promo Generator</title>
     
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- VARIABLES --- */
         :root {
             --bg-primary:   #161640;
             --bg-body:      #161640;
@@ -30,7 +28,6 @@
             --font-main:    'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
-        /* --- GLOBAL RESETS --- */
         * {
             margin: 0;
             padding: 0;
@@ -50,7 +47,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Background Gradient */
         body::before {
             content: '';
             position: fixed;
@@ -59,7 +55,6 @@
             z-index: -1;
         }
 
-        /* --- LAYOUT --- */
         .container {
             max-width: 720px;
             margin: 0 auto;
@@ -78,6 +73,29 @@
             outline: none;
         }
 
+        /* --- HINT BADGE --- */
+        .hint-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(168, 85, 247, 0.12);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 100px;
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+            color: rgba(168, 85, 247, 0.9);
+            font-weight: 600;
+            margin-top: 0.6rem;
+            letter-spacing: 0.02em;
+        }
+        .hint-badge code {
+            background: rgba(168, 85, 247, 0.2);
+            border-radius: 4px;
+            padding: 0.1rem 0.4rem;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+
         /* --- EDITABLE TEXT FIELDS --- */
         [contenteditable="true"] {
             outline: none;
@@ -94,7 +112,7 @@
             pointer-events: none;
         }
 
-        /* --- PREVIEW IMAGE (UPLOAD/DRAG) --- */
+        /* --- PREVIEW IMAGE --- */
         .preview-section {
             text-align: center;
             margin-bottom: 2rem;
@@ -132,6 +150,7 @@
             font-weight: 500;
             pointer-events: none;
             z-index: 2;
+            text-align: center;
         }
         
         .upload-placeholder i {
@@ -139,6 +158,7 @@
             margin-bottom: 12px;
             color: var(--accent);
             opacity: 0.8;
+            display: block;
         }
 
         .preview-image {
@@ -164,7 +184,7 @@
             overflow: visible;
         }
 
-        /* --- EXACT COPY BUTTON STYLING --- */
+        /* --- COPY BUTTON --- */
         .top-copy-btn {
             position: absolute;
             top: -18px;
@@ -181,7 +201,6 @@
             justify-content: center;
             transition: all 0.2s ease;
             z-index: 10;
-            opacity: 1;
             width: 36px;
             height: 36px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -193,11 +212,9 @@
             border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .top-copy-btn i {
-            font-size: 1.1rem;
-        }
+        .top-copy-btn i { font-size: 1.1rem; }
 
-        /* --- RESULT CONTENT & TEXT --- */
+        /* --- RESULT CONTENT --- */
         .result-content {
             position: relative;
             z-index: 1;
@@ -206,7 +223,6 @@
             display: block;
         }
 
-        /* Base Paragraph text */
         .ai-line {
             line-height: 1.5;
             font-size: 1.05rem;
@@ -216,39 +232,112 @@
             white-space: pre-wrap;
         }
 
-        /* Main Purple Heading */
         .ai-line.is-header {
             font-size: 1.65rem;
             font-weight: 700;
-            margin-bottom: 0 !important; /* Zero margin to tighten gap */
+            margin-bottom: 0 !important;
             margin-top: 1.25rem;
             color: var(--accent);
             letter-spacing: -0.02em;
-            line-height: 1.2; /* Tightened line-height */
+            line-height: 1.2;
         }
-        .ai-line.is-header:first-child {
-            margin-top: 0 !important;
-        }
+        .ai-line.is-header:first-child { margin-top: 0 !important; }
 
-        /* Bold White Sub-Heading */
         .ai-line.is-sub-header {
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--fg-primary);
             margin-bottom: 0.05rem !important;
-            margin-top: 0 !important; /* Removed all top margin */
+            margin-top: 0 !important;
             line-height: 1.3;
         }
 
-        /* Highlight Styling for Live Markdown formatting */
         .highlight-bold {
             font-weight: 700;
             color: var(--fg-primary);
         }
-        em {
-            font-style: italic;
+        em { font-style: italic; }
+
+        /* ================================================
+           SHOW MORE ACCORDION — matches production page exactly
+        ================================================ */
+
+        .show-more-wrapper {
+            display: block;
+            margin-bottom: 0.6rem;
         }
-        
+
+        /* Body: fades in after insertion via .visible class */
+        .section-body {
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+        }
+
+        .section-body.visible {
+            opacity: 1;
+        }
+
+        /* Gradient mask — solid for first ~70px, fades out by 145px */
+        .section-body:not(.expanded) {
+            -webkit-mask-image: linear-gradient(to bottom, black 0px, black 70px, transparent 145px);
+            mask-image: linear-gradient(to bottom, black 0px, black 70px, transparent 145px);
+        }
+
+        /* Kill mask completely when open (performance + no clipping) */
+        .section-body.expanded {
+            -webkit-mask-image: none !important;
+            mask-image: none !important;
+        }
+
+        /* Toggle button — starts invisible, fades in via .is-ready */
+        .section-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: var(--font-main);
+            padding: 0.35rem 0;
+            cursor: pointer;
+            position: relative;
+            top: -0.5rem;
+            opacity: 0;
+            transition: color 0.25s ease, transform 0.25s ease, opacity 0.8s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Button fades in once content is ready */
+        .section-toggle-btn.is-ready {
+            opacity: 1;
+        }
+
+        /* When expanded: sits flush under content */
+        .section-toggle-btn.is-expanded {
+            top: 0rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-toggle-btn i {
+            font-size: 0.8rem;
+            transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section-toggle-btn.is-expanded i {
+            transform: rotate(180deg);
+        }
+
+        .section-toggle-btn:hover {
+            color: rgba(255, 255, 255, 0.85);
+            transform: translateY(-1px);
+        }
+
+        /* --- RESPONSIVE --- */
         @media(max-width: 768px) {
             h1 { font-size: 2rem; }
             .container { padding: 2rem 1rem; }
@@ -262,62 +351,54 @@
             h1 { font-size: 1.75rem; }
             .result-box { padding: 1.75rem 1.25rem; }
             .preview-image-container { width: 180px; height: 180px; }
-            
-            .top-copy-btn {
-                top: -18px;
-                right: 1rem;
-                padding: 0.4rem;
-                width: 34px;
-                height: 34px;
-            }
-            .top-copy-btn i {
-                font-size: 1rem;
-            }
+            .top-copy-btn { top: -18px; right: 1rem; width: 34px; height: 34px; }
+            .top-copy-btn i { font-size: 1rem; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Editable Page Title -->
         <header>
             <h1 contenteditable="true" spellcheck="false">Your Analysis Results</h1>
+            <div class="hint-badge">
+                <i class="fa-solid fa-wand-magic-sparkles" style="font-size:0.75rem;"></i>
+                Type <code>&amp;s</code> on a new line → Show More section
+            </div>
         </header>
 
-        <!-- Clickable / Drag&Drop Image Area -->
+        <!-- Image Upload -->
         <div class="preview-section" id="previewSection">
             <div class="preview-image-container" id="dropzone">
                 <input type="file" id="fileInput" accept="image/*" style="display: none;">
                 <div class="upload-placeholder" id="uploadPlaceholder">
-                    <i class="fa-solid fa-cloud-arrow-up"></i><br>
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
                     Click or Drag Image
                 </div>
                 <img id="previewImage" class="preview-image" src="" alt="Your Image">
             </div>
         </div>
 
-        <!-- Fully Editable Results Container -->
+        <!-- Editable Results -->
         <div class="results-container">
             <div class="result-box" id="resultBox">
                 
-                <!-- THE ORIGINAL COPY BUTTON -->
                 <button class="top-copy-btn" title="Copy to clipboard" contenteditable="false">
                     <i class="fa-regular fa-clipboard"></i>
                 </button>
 
                 <div id="resultContent" class="result-content">
                     
-                    <!-- Pre-filled Section 1 -->
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Face Shape Analysis</h3>
                     <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">The Square Structure</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Based on the facial mapping, you have a strongly defined jawline with balanced cheekbones, revealing a classic structured <span class="highlight-bold">square face shape</span>. This structure provides a highly masculine foundation for versatile styling.</p>
 
-                    <!-- Pre-filled Section 2 -->
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Best Hairstyles</h3>
                     <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Volume is Key</div>
-                    <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Because of your sharp structure, opt for styles that add volume on top while keeping the sides tight. A <em>textured modern fringe</em>, a classic pompadour, or a neat skin fade will complement your facial proportions perfectly.</p>
+                    <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Because of your sharp structure, opt for styles that add volume on top while keeping the sides tight. A <em>textured modern fringe</em>, a classic pompadour, or a neat skin fade will complement your facial proportions perfectly.
 
-                    <!-- Pre-filled Section 3 -->
+The sides are cut with clippers, staying relatively short but not quite buzzed. The top is around <span class="highlight-bold">one and a half to two inches</span> long and gets tapered gradually from front to back. Your barber creates a subtle part on one side and cuts everything with precision scissors for a clean, intentional finish that suits your structure.</p>
+
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Custom Skincare Routine</h3>
                     <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Hydration Focused</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Your skin appears to have a combination profile with slight signs of dehydration around the lower cheeks. 
@@ -325,12 +406,10 @@
 2. Incorporate a Vitamin C serum to even out the tone.
 3. Finish with a lightweight moisturizer and an invisible SPF 50.</p>
 
-                    <!-- Pre-filled Section 4 -->
-                    <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Colors & Style</h3>
-                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Deep & Bold Contrast</div>
+                    <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Colors &amp; Style</h3>
+                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Deep &amp; Bold Contrast</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Your contrast level and cool undertones mean you look exceptionally well in jewel tones. Build your wardrobe around deep navy blues, emerald greens, and charcoal grays to make your features stand out effortlessly.</p>
 
-                    <!-- Pre-filled Section 5 -->
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Grooming Advice</h3>
                     <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Emphasizing The Jawline</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Keep your beard trimmed to a neat 3-5mm stubble. This enhances the shadow on your jawline without hiding your strong natural bone structure. Apply a few drops of beard oil daily to prevent dry skin underneath.</p>
@@ -340,46 +419,40 @@
         </div>
     </div>
 
-    <!-- Logic for Image Upload and Clean Pasting / Live Markdown -->
     <script>
+        /* =====================================================
+           IMAGE UPLOAD
+        ===================================================== */
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const previewImage = document.getElementById('previewImage');
         const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 
-        // Trigger file select on click
         dropzone.addEventListener('click', () => fileInput.click());
 
-        // Handle Drag & Drop styling
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropzone.style.borderColor = 'var(--accent)';
-            dropzone.style.background = 'rgba(255, 255, 255, 0.1)';
+            dropzone.style.background = 'rgba(255,255,255,0.1)';
         });
 
         dropzone.addEventListener('dragleave', () => {
-            if(!dropzone.classList.contains('has-image')) {
-                dropzone.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            }
-            dropzone.style.background = 'rgba(255, 255, 255, 0.03)';
+            if (!dropzone.classList.contains('has-image'))
+                dropzone.style.borderColor = 'rgba(255,255,255,0.2)';
+            dropzone.style.background = 'rgba(255,255,255,0.03)';
         });
 
-        // Handle Drop
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            if (e.dataTransfer.files && e.dataTransfer.files[0])
                 handleFile(e.dataTransfer.files[0]);
-            }
         });
 
-        // Handle File Input Selection
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
+            if (e.target.files && e.target.files[0])
                 handleFile(e.target.files[0]);
-            }
         });
 
-        // Load the image into the container and center crop it
         function handleFile(file) {
             if (!file.type.startsWith('image/')) return;
             const reader = new FileReader();
@@ -392,86 +465,178 @@
             reader.readAsDataURL(file);
         }
 
-        /* ----------------------------------------------------
-           LIVE MARKDOWN & PASTE ENGINE
-        ----------------------------------------------------- */
+        /* =====================================================
+           COPY BUTTON
+        ===================================================== */
+        document.querySelector('.top-copy-btn').addEventListener('click', function () {
+            const text = document.getElementById('resultContent').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = this.querySelector('i');
+                icon.className = 'fa-solid fa-check';
+                setTimeout(() => { icon.className = 'fa-regular fa-clipboard'; }, 2000);
+            });
+        });
 
+        /* =====================================================
+           SHOW MORE ACCORDION
+           convertToShowMore(el) — wraps a p.ai-line in the
+           collapsible structure when &s is detected.
+        ===================================================== */
+        const COLLAPSED_HEIGHT = 150; // px
+
+        function convertToShowMore(el, prefillText) {
+            const parent = el.parentNode;
+            const nextSib = el.nextSibling; // must capture BEFORE any DOM moves
+
+            // Set content — strip &s, keep whatever else was there
+            el.innerHTML = prefillText || '';
+
+            // ── Build: wrapper > body > el ──
+            const wrapper = document.createElement('div');
+            wrapper.className = 'show-more-wrapper';
+
+            const body = document.createElement('div');
+            body.className = 'section-body'; // opacity:0 — will fade in below
+            body.style.maxHeight = COLLAPSED_HEIGHT + 'px';
+
+            body.appendChild(el);
+            wrapper.appendChild(body);
+            parent.insertBefore(wrapper, nextSib); // put wrapper where el used to live
+
+            // ── Toggle button (starts invisible) ──
+            const btn = document.createElement('button');
+            btn.className = 'section-toggle-btn'; // opacity:0 until is-ready
+            btn.contentEditable = 'false';
+            btn.innerHTML = '<span>Show More</span><i class="fa-solid fa-chevron-down"></i>';
+            wrapper.appendChild(btn);
+
+            // ── Accordion logic ──
+            btn.addEventListener('click', () => {
+                const expanded = body.classList.contains('expanded');
+                if (!expanded) {
+                    body.classList.add('expanded');
+                    // scrollHeight + generous buffer so newly typed content isn't clipped
+                    body.style.maxHeight = body.scrollHeight + 400 + 'px';
+                    btn.classList.add('is-expanded');
+                    btn.querySelector('span').textContent = 'Show Less';
+                } else {
+                    body.classList.remove('expanded');
+                    body.style.maxHeight = COLLAPSED_HEIGHT + 'px';
+                    btn.classList.remove('is-expanded');
+                    btn.querySelector('span').textContent = 'Show More';
+                }
+            });
+
+            // Keep max-height current while user types inside an open section
+            el.addEventListener('input', () => {
+                if (body.classList.contains('expanded'))
+                    body.style.maxHeight = body.scrollHeight + 400 + 'px';
+            });
+
+            // ── Staggered fade-in: body first, button slightly after ──
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                body.classList.add('visible');          // body fades in (0.4s)
+                setTimeout(() => btn.classList.add('is-ready'), 500); // btn fades in after content settles
+            }));
+
+            // Place cursor at end of whatever content is in el
+            el.focus();
+            const r = document.createRange();
+            r.selectNodeContents(el);
+            r.collapse(false);
+            const s = window.getSelection();
+            s.removeAllRanges();
+            s.addRange(r);
+        }
+
+        /* =====================================================
+           LIVE MARKDOWN + &s TRIGGER ENGINE
+        ===================================================== */
         function applyMarkdown(text) {
-            // Protect bold markers temporarily to avoid italic clash
             text = text.replace(/\*\*(.*?)\*\*/g, '___B___$1___/B___');
-            // Apply Italic
             text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            // Restore Bold as HTML
             text = text.replace(/___B___(.*?)___\/B___/g, '<span class="highlight-bold">$1</span>');
             return text;
         }
 
-        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-            
-            // 1. Paste formatting
-            el.addEventListener('paste', function(e) {
+        // Attach handlers to all current + future editable elements
+        function attachEditorHandlers(el) {
+
+            // Paste: clean + apply markdown
+            el.addEventListener('paste', function (e) {
                 e.preventDefault();
                 let text = (e.originalEvent || e).clipboardData.getData('text/plain');
-                
-                // Escape HTML tags from pasted text so it doesn't break layout
                 text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                
-                // Apply Markdown to pasted text
                 text = applyMarkdown(text);
-                
-                // Convert newlines to HTML breaks
                 text = text.replace(/\n/g, '<br>');
-                
-                // Insert directly at cursor
                 document.execCommand('insertHTML', false, text);
             });
 
-            // 2. Live typing formatting
-            el.addEventListener('keyup', function(e) {
-                // Ignore arrow keys to not interrupt normal navigation
-                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
-                
+            // Keyup: check for &s trigger OR live markdown
+            el.addEventListener('keyup', function (e) {
+                if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
+
+                // ── &s TRIGGER — fires when &s appears anywhere in the element ──
+                if (this.innerText.includes('&s')) {
+                    const cleaned = this.innerText.replace('&s', '').trimEnd();
+                    const prefill = cleaned
+                        ? cleaned.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
+                        : '';
+                    convertToShowMore(this, prefill);
+                    return;
+                }
+
+                // ── LIVE MARKDOWN ──
                 let html = this.innerHTML;
-                
-                // Trigger only if there's an asterisk
-                if (html.includes('*')) {
-                    
-                    // Count to ensure we only format when the pair is fully closed
-                    const boldCount = (html.match(/\*\*/g) || []).length;
-                    const italicCount = (html.replace(/\*\*/g, '').match(/\*/g) || []).length;
-                    
-                    if (boldCount % 2 === 0 && italicCount % 2 === 0) {
-                        
-                        // Drop an invisible marker where the typing cursor currently is
-                        let sel = window.getSelection();
-                        if (!sel.rangeCount) return;
-                        let range = sel.getRangeAt(0);
-                        let marker = document.createElement('span');
-                        marker.id = 'caret-marker';
-                        range.insertNode(marker);
-                        
-                        // Grab the HTML (now including the marker) and apply markdown formatting
-                        let htmlWithMarker = this.innerHTML;
-                        let formattedHtml = applyMarkdown(htmlWithMarker);
-                        
-                        if (htmlWithMarker !== formattedHtml) {
-                            this.innerHTML = formattedHtml;
-                        }
-                        
-                        // Find the marker, place the cursor right after it, and delete the marker
-                        let restoredMarker = document.getElementById('caret-marker');
-                        if (restoredMarker) {
-                            let newRange = document.createRange();
-                            newRange.setStartAfter(restoredMarker);
-                            newRange.collapse(true);
-                            sel.removeAllRanges();
-                            sel.addRange(newRange);
-                            restoredMarker.remove();
-                        }
+                if (!html.includes('*')) return;
+
+                const boldCount  = (html.match(/\*\*/g) || []).length;
+                const italicCount = (html.replace(/\*\*/g, '').match(/\*/g) || []).length;
+
+                if (boldCount % 2 === 0 && italicCount % 2 === 0) {
+                    let sel = window.getSelection();
+                    if (!sel.rangeCount) return;
+                    let range = sel.getRangeAt(0);
+                    let marker = document.createElement('span');
+                    marker.id = 'caret-marker';
+                    range.insertNode(marker);
+
+                    let htmlWithMarker = this.innerHTML;
+                    let formatted = applyMarkdown(htmlWithMarker);
+
+                    if (htmlWithMarker !== formatted) {
+                        this.innerHTML = formatted;
+                    }
+
+                    let restored = document.getElementById('caret-marker');
+                    if (restored) {
+                        let newRange = document.createRange();
+                        newRange.setStartAfter(restored);
+                        newRange.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(newRange);
+                        restored.remove();
                     }
                 }
             });
+        }
+
+        // Attach to all existing contenteditable elements
+        document.querySelectorAll('[contenteditable="true"]').forEach(attachEditorHandlers);
+
+        // MutationObserver: attach to any new contenteditable elements added to the DOM
+        // (e.g. when paragraphs are created inside section-body wrappers)
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType !== 1) return;
+                    if (node.contentEditable === 'true') attachEditorHandlers(node);
+                    node.querySelectorAll && node.querySelectorAll('[contenteditable="true"]').forEach(attachEditorHandlers);
+                });
+            });
         });
+        observer.observe(document.getElementById('resultContent'), { childList: true, subtree: true });
+
     </script>
 </body>
 </html>
