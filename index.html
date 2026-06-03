@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,29 +73,6 @@
             margin-bottom: 0.5rem;
             color: var(--fg-primary);
             outline: none;
-        }
-
-        /* --- HINT BADGE --- */
-        .hint-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(168, 85, 247, 0.12);
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            border-radius: 100px;
-            padding: 0.4rem 1rem;
-            font-size: 0.8rem;
-            color: rgba(168, 85, 247, 0.9);
-            font-weight: 600;
-            margin-top: 0.6rem;
-            letter-spacing: 0.02em;
-        }
-        .hint-badge code {
-            background: rgba(168, 85, 247, 0.2);
-            border-radius: 4px;
-            padding: 0.1rem 0.4rem;
-            font-family: monospace;
-            font-size: 0.85em;
         }
 
         /* --- EDITABLE TEXT FIELDS --- */
@@ -259,7 +238,7 @@
         em { font-style: italic; }
 
         /* ================================================
-           SHOW MORE ACCORDION — matches production page exactly
+           SHOW MORE ACCORDION
         ================================================ */
 
         .show-more-wrapper {
@@ -285,7 +264,7 @@
             mask-image: linear-gradient(to bottom, black 0px, black 70px, transparent 145px);
         }
 
-        /* Kill mask completely when open (performance + no clipping) */
+        /* Kill mask completely when open */
         .section-body.expanded {
             -webkit-mask-image: none !important;
             mask-image: none !important;
@@ -360,11 +339,7 @@
 
     <div class="container">
         <header>
-            <h1 contenteditable="true" spellcheck="false">Your Analysis Results</h1>
-            <div class="hint-badge">
-                <i class="fa-solid fa-wand-magic-sparkles" style="font-size:0.75rem;"></i>
-                Type <code>&amp;s</code> on a new line → Show More section
-            </div>
+            <h1 id="mainTitle" contenteditable="true" spellcheck="false">FaceAid's Analysis</h1>
         </header>
 
         <!-- Image Upload -->
@@ -421,13 +396,91 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
 
     <script>
         /* =====================================================
-           IMAGE UPLOAD
+           DOM ELEMENTS & CONSTANTS
         ===================================================== */
+        const COLLAPSED_HEIGHT = 150; // px
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const previewImage = document.getElementById('previewImage');
         const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 
+        /* =====================================================
+           STATE MANAGEMENT (LOCAL STORAGE)
+        ===================================================== */
+        function saveState() {
+            try {
+                const title = document.getElementById('mainTitle').innerHTML;
+                const content = document.getElementById('resultContent').innerHTML;
+                localStorage.setItem('faceAid_title', title);
+                localStorage.setItem('faceAid_content', content);
+            } catch (err) {
+                console.warn("Storage exception", err);
+            }
+        }
+
+        function rebindAccordions() {
+            document.querySelectorAll('.section-toggle-btn').forEach(btn => {
+                const wrapper = btn.closest('.show-more-wrapper');
+                if (!wrapper) return;
+                const body = wrapper.querySelector('.section-body');
+                if (!body) return;
+
+                // FIX: If restored from local storage before fade-in completed, force them visible!
+                body.classList.add('visible');
+
+                // Replace to wipe out old inactive listeners
+                const newBtn = btn.cloneNode(true);
+                newBtn.classList.add('is-ready'); // FIX: Ensure button is visible!
+                btn.parentNode.replaceChild(newBtn, btn);
+
+                newBtn.addEventListener('click', () => {
+                    const expanded = body.classList.contains('expanded');
+                    if (!expanded) {
+                        body.classList.add('expanded');
+                        body.style.maxHeight = body.scrollHeight + 400 + 'px';
+                        newBtn.classList.add('is-expanded');
+                        newBtn.querySelector('span').textContent = 'Show Less';
+                    } else {
+                        body.classList.remove('expanded');
+                        body.style.maxHeight = COLLAPSED_HEIGHT + 'px';
+                        newBtn.classList.remove('is-expanded');
+                        newBtn.querySelector('span').textContent = 'Show More';
+                    }
+                    saveState();
+                });
+
+                const el = body.querySelector('.ai-line');
+                if (el) {
+                    el.addEventListener('input', () => {
+                        if (body.classList.contains('expanded')) {
+                            body.style.maxHeight = body.scrollHeight + 400 + 'px';
+                        }
+                    });
+                }
+            });
+        }
+
+        function loadState() {
+            const savedTitle = localStorage.getItem('faceAid_title');
+            const savedContent = localStorage.getItem('faceAid_content');
+            const savedImage = localStorage.getItem('faceAid_image');
+
+            if (savedTitle) document.getElementById('mainTitle').innerHTML = savedTitle;
+            if (savedContent) document.getElementById('resultContent').innerHTML = savedContent;
+            
+            if (savedImage) {
+                previewImage.src = savedImage;
+                previewImage.style.display = 'block';
+                uploadPlaceholder.style.display = 'none';
+                dropzone.classList.add('has-image');
+            }
+
+            rebindAccordions();
+        }
+
+        /* =====================================================
+           IMAGE UPLOAD
+        ===================================================== */
         dropzone.addEventListener('click', () => fileInput.click());
 
         dropzone.addEventListener('dragover', (e) => {
@@ -457,10 +510,36 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
             if (!file.type.startsWith('image/')) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                previewImage.src = e.target.result;
+                const originalUrl = e.target.result;
+                
+                // Show Immediately
+                previewImage.src = originalUrl;
                 previewImage.style.display = 'block';
                 uploadPlaceholder.style.display = 'none';
                 dropzone.classList.add('has-image');
+
+                // Compress & Save (prevents LocalStorage 5MB quota errors)
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width;
+                    let h = img.height;
+                    const MAX = 800; 
+                    
+                    if (w > h && w > MAX) { h *= MAX / w; w = MAX; }
+                    else if (h > MAX) { w *= MAX / h; h = MAX; }
+                    
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    
+                    try {
+                        localStorage.setItem('faceAid_image', canvas.toDataURL('image/jpeg', 0.8));
+                    } catch (err) {
+                        console.warn("Storage quota exceeded", err);
+                    }
+                };
+                img.src = originalUrl;
             };
             reader.readAsDataURL(file);
         }
@@ -478,44 +557,35 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
         });
 
         /* =====================================================
-           SHOW MORE ACCORDION
-           convertToShowMore(el) — wraps a p.ai-line in the
-           collapsible structure when &s is detected.
+           SHOW MORE ACCORDION CREATION
         ===================================================== */
-        const COLLAPSED_HEIGHT = 150; // px
-
         function convertToShowMore(el, prefillText) {
             const parent = el.parentNode;
-            const nextSib = el.nextSibling; // must capture BEFORE any DOM moves
+            const nextSib = el.nextSibling; 
 
-            // Set content — strip &s, keep whatever else was there
             el.innerHTML = prefillText || '';
 
-            // ── Build: wrapper > body > el ──
             const wrapper = document.createElement('div');
             wrapper.className = 'show-more-wrapper';
 
             const body = document.createElement('div');
-            body.className = 'section-body'; // opacity:0 — will fade in below
+            body.className = 'section-body'; 
             body.style.maxHeight = COLLAPSED_HEIGHT + 'px';
 
             body.appendChild(el);
             wrapper.appendChild(body);
-            parent.insertBefore(wrapper, nextSib); // put wrapper where el used to live
+            parent.insertBefore(wrapper, nextSib); 
 
-            // ── Toggle button (starts invisible) ──
             const btn = document.createElement('button');
-            btn.className = 'section-toggle-btn'; // opacity:0 until is-ready
+            btn.className = 'section-toggle-btn'; 
             btn.contentEditable = 'false';
             btn.innerHTML = '<span>Show More</span><i class="fa-solid fa-chevron-down"></i>';
             wrapper.appendChild(btn);
 
-            // ── Accordion logic ──
             btn.addEventListener('click', () => {
                 const expanded = body.classList.contains('expanded');
                 if (!expanded) {
                     body.classList.add('expanded');
-                    // scrollHeight + generous buffer so newly typed content isn't clipped
                     body.style.maxHeight = body.scrollHeight + 400 + 'px';
                     btn.classList.add('is-expanded');
                     btn.querySelector('span').textContent = 'Show Less';
@@ -525,21 +595,22 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
                     btn.classList.remove('is-expanded');
                     btn.querySelector('span').textContent = 'Show More';
                 }
+                saveState();
             });
 
-            // Keep max-height current while user types inside an open section
             el.addEventListener('input', () => {
-                if (body.classList.contains('expanded'))
+                if (body.classList.contains('expanded')) {
                     body.style.maxHeight = body.scrollHeight + 400 + 'px';
+                }
             });
 
-            // ── Staggered fade-in: body first, button slightly after ──
+            // Trigger animations
             requestAnimationFrame(() => requestAnimationFrame(() => {
-                body.classList.add('visible');          // body fades in (0.4s)
-                setTimeout(() => btn.classList.add('is-ready'), 500); // btn fades in after content settles
+                body.classList.add('visible');          
+                setTimeout(() => btn.classList.add('is-ready'), 500); 
             }));
 
-            // Place cursor at end of whatever content is in el
+            // Reset focus
             el.focus();
             const r = document.createRange();
             r.selectNodeContents(el);
@@ -547,6 +618,8 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
             const s = window.getSelection();
             s.removeAllRanges();
             s.addRange(r);
+
+            saveState();
         }
 
         /* =====================================================
@@ -559,10 +632,7 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
             return text;
         }
 
-        // Attach handlers to all current + future editable elements
         function attachEditorHandlers(el) {
-
-            // Paste: clean + apply markdown
             el.addEventListener('paste', function (e) {
                 e.preventDefault();
                 let text = (e.originalEvent || e).clipboardData.getData('text/plain');
@@ -570,14 +640,26 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
                 text = applyMarkdown(text);
                 text = text.replace(/\n/g, '<br>');
                 document.execCommand('insertHTML', false, text);
+                saveState();
             });
 
-            // Keyup: check for &s trigger OR live markdown
             el.addEventListener('keyup', function (e) {
                 if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
 
-                // ── &s TRIGGER — fires when &s appears anywhere in the element ──
                 if (this.innerText.includes('&s')) {
+                    // FIX: Prevent nesting breaking everything!
+                    if (this.closest('.show-more-wrapper')) {
+                        this.innerHTML = this.innerHTML.replace(/&amp;s/g, '').replace(/&s/g, '');
+                        const r = document.createRange();
+                        r.selectNodeContents(this);
+                        r.collapse(false);
+                        const s = window.getSelection();
+                        s.removeAllRanges();
+                        s.addRange(r);
+                        saveState();
+                        return; // Halt immediately so it doesn't wrap again!
+                    }
+
                     const cleaned = this.innerText.replace('&s', '').trimEnd();
                     const prefill = cleaned
                         ? cleaned.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
@@ -586,7 +668,6 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
                     return;
                 }
 
-                // ── LIVE MARKDOWN ──
                 let html = this.innerHTML;
                 if (!html.includes('*')) return;
 
@@ -606,6 +687,7 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
 
                     if (htmlWithMarker !== formatted) {
                         this.innerHTML = formatted;
+                        saveState();
                     }
 
                     let restored = document.getElementById('caret-marker');
@@ -621,11 +703,24 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
             });
         }
 
-        // Attach to all existing contenteditable elements
+        /* =====================================================
+           INITIALIZATION & OBSERVERS
+        ===================================================== */
+        
+        // 1. Load the exact state on refresh before applying logic to newly loaded content
+        loadState();
+
+        // 2. Global delegate to detect ANY edits automatically and save state instantly
+        document.addEventListener('input', (e) => {
+            if (e.target.hasAttribute('contenteditable')) {
+                saveState();
+            }
+        });
+
+        // 3. Attach markdown functionality to all currently rendered contenteditable items
         document.querySelectorAll('[contenteditable="true"]').forEach(attachEditorHandlers);
 
-        // MutationObserver: attach to any new contenteditable elements added to the DOM
-        // (e.g. when paragraphs are created inside section-body wrappers)
+        // 4. MutationObserver for dynamic "Show More" accordion creations
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
