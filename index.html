@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,10 +55,110 @@
             z-index: -1;
         }
 
+        /* ================================================
+           START DEMO BUTTON — top bar
+        ================================================ */
+        .demo-toolbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 9000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            padding: 0.75rem 1.5rem;
+            background: rgba(22, 22, 64, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .demo-toolbar.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-100%);
+        }
+
+        .toolbar-info {
+            color: var(--fg-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--fg-primary);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 0.55rem 1.2rem;
+            border-radius: 50px;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        .reset-btn:active {
+            transform: translateY(0);
+        }
+
+        .record-demo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: #fff;
+            border: none;
+            padding: 0.55rem 1.5rem;
+            border-radius: 50px;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.01em;
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.45);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            user-select: none;
+        }
+        .record-demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(168, 85, 247, 0.6);
+        }
+        .record-demo-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 12px rgba(168, 85, 247, 0.35);
+        }
+        .record-demo-btn .btn-dot {
+            width: 9px; height: 9px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(255,77,77,0.9);
+            animation: blink 1.4s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.25; }
+        }
+
+        /* ================================================
+           MAIN PAGE CONTENT
+        ================================================ */
         .container {
             max-width: 720px;
             margin: 0 auto;
-            padding: 3rem 1.5rem;
+            padding: 5rem 1.5rem 3rem;
             width: 100%;
         }
 
@@ -195,38 +293,47 @@
 
         /* --- RESULT CONTENT --- */
         .result-content {
+            line-height: 1.5;
+            font-size: 1.1rem;
             position: relative;
             z-index: 1;
             max-width: 100%;
             overflow-wrap: break-word;
             display: block;
+            padding-top: 0;
         }
 
         .ai-line {
+            opacity: 1; 
+            transform: translateY(0);
             line-height: 1.5;
             font-size: 1.05rem;
             color: var(--fg-primary);
             margin-top: 0;
             margin-bottom: 0.6rem;
             white-space: pre-wrap;
+            will-change: opacity, transform;
         }
 
         .ai-line.is-header {
             font-size: 1.65rem;
             font-weight: 700;
-            margin-bottom: 0 !important;
-            margin-top: 1.25rem;
+            margin-bottom: 0.05rem !important;
+            margin-top: 0.5rem;
             color: var(--accent);
             letter-spacing: -0.02em;
-            line-height: 1.2;
+            line-height: 1.3;
         }
-        .ai-line.is-header:first-child { margin-top: 0 !important; }
+        
+        .ai-line.is-header:first-child { 
+            margin-top: 0 !important; 
+        }
 
         .ai-line.is-sub-header {
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--fg-primary);
-            margin-bottom: 0.05rem !important;
+            margin-bottom: 0.2rem !important;
             margin-top: 0 !important;
             line-height: 1.3;
         }
@@ -234,23 +341,22 @@
         .highlight-bold {
             font-weight: 700;
             color: var(--fg-primary);
+            font-size: 1em;
         }
         em { font-style: italic; }
 
         /* ================================================
-           SHOW MORE ACCORDION
+           SHOW MORE ACCORDION (Fixed Tighter Spacing)
         ================================================ */
-
         .show-more-wrapper {
             display: block;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0;
         }
 
-        /* Body: fades in after insertion via .visible class */
         .section-body {
             position: relative;
             overflow: hidden;
-            opacity: 0;
+            opacity: 1; 
             transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
         }
 
@@ -258,52 +364,50 @@
             opacity: 1;
         }
 
-        /* Gradient mask — solid for first ~70px, fades out by 145px */
+        /* Slightly shorter mask to prevent large transparent gap */
         .section-body:not(.expanded) {
-            -webkit-mask-image: linear-gradient(to bottom, black 0px, black 70px, transparent 145px);
-            mask-image: linear-gradient(to bottom, black 0px, black 70px, transparent 145px);
+            -webkit-mask-image: linear-gradient(to bottom, black 0px, black 60px, transparent 125px);
+            mask-image: linear-gradient(to bottom, black 0px, black 60px, transparent 125px);
         }
 
-        /* Kill mask completely when open */
         .section-body.expanded {
             -webkit-mask-image: none !important;
             mask-image: none !important;
         }
 
-        /* Toggle button — starts invisible, fades in via .is-ready */
         .section-toggle-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.3rem;
             background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.5);
-            font-size: 0.95rem;
+            font-size: 0.82rem;
             font-weight: 500;
             font-family: var(--font-main);
-            padding: 0.35rem 0;
+            padding: 0;
+            border-radius: 0;
             cursor: pointer;
+            
+            /* TUCK THE BUTTON IN TIGHTLY */
+            margin-top: -1.25rem;
+            margin-bottom: -0.5rem; 
+            
             position: relative;
-            top: -0.5rem;
-            opacity: 0;
-            transition: color 0.25s ease, transform 0.25s ease, opacity 0.8s ease;
+            z-index: 10;
+            opacity: 1; 
+            transition: color 0.25s ease, transform 0.25s ease, opacity 0.35s ease;
             user-select: none;
             -webkit-user-select: none;
         }
 
-        /* Button fades in once content is ready */
-        .section-toggle-btn.is-ready {
-            opacity: 1;
-        }
-
-        /* When expanded: sits flush under content */
         .section-toggle-btn.is-expanded {
-            top: 0rem;
-            margin-bottom: 1.25rem;
+            margin-top: 0.25rem;
+            margin-bottom: 1rem;
         }
 
         .section-toggle-btn i {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -316,14 +420,190 @@
             transform: translateY(-1px);
         }
 
+        /* ================================================
+           DEMO REPLAY — FADE OVERLAY
+        ================================================ */
+        #demoFadeOverlay {
+            position: fixed;
+            inset: 0;
+            background: #0d0d22;
+            z-index: 8000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease; /* Faster transitions for zero lag */
+        }
+        #demoFadeOverlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ================================================
+           DEMO REPLAY — LOADING SCREEN
+        ================================================ */
+        #demoLoadingScreen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 8500;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        #demoLoadingScreen.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        #demoLoadingScreen::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: var(--bg-gradient);
+            z-index: -1;
+        }
+
+        .demo-loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .demo-loading-image-wrapper {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            background: #000;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            mask-image: -webkit-radial-gradient(white, black);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .demo-loading-image-wrapper.fading-out {
+            opacity: 0 !important;
+            transform: scale(0.95) !important;
+            transition: opacity 0.45s ease-out, transform 0.45s ease-out !important;
+        }
+
+        .demo-loading-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transform: scale(1.05);
+            transition: opacity 0.6s ease-out, transform 1s ease-out;
+        }
+
+        #demoLoadingScreen.active .demo-loading-image {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .demo-shimmer-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent 25%,
+                rgba(56, 189, 248, 0.0) 32%,
+                rgba(56, 189, 248, 0.25) 42%,
+                rgba(255, 255, 255, 0.55) 50%,
+                rgba(147, 51, 234, 0.25) 58%,
+                rgba(147, 51, 234, 0.0) 68%,
+                transparent 75%
+            );
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: translate3d(-100%, 0, 0);
+        }
+
+        .demo-dark-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            opacity: 1;
+            z-index: 2;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            will-change: opacity;
+        }
+
+        #demoLoadingScreen.shimmer-active .demo-dark-overlay {
+            animation: demoDarkPulse 2.5s infinite cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        @keyframes demoDarkPulse {
+            0% { opacity: 1; }
+            5% { opacity: 1; }
+            50% { opacity: 0; }
+            60% { opacity: 0; }
+            95% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+
+        #demoLoadingScreen.shimmer-active .demo-shimmer-overlay {
+            animation: demoIntenseFlow 2.5s infinite linear;
+        }
+
+        @keyframes demoIntenseFlow {
+            0% { transform: translate3d(-100%, 0, 0); }
+            100% { transform: translate3d(100%, 0, 0); }
+        }
+
+        /* ================================================
+           ANIMATED REVEAL
+        ================================================ */
+        .animate-reveal {
+            -webkit-mask-image: linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%);
+            mask-image: linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%);
+            -webkit-mask-size: 250% 100%;
+            mask-size: 250% 100%;
+            -webkit-mask-position: 100% 0;
+            mask-position: 100% 0;
+            animation: geminiSwipe 2.5s cubic-bezier(0.2, 0.0, 0.2, 1) forwards;
+        }
+
+        @keyframes geminiSwipe {
+            0% {
+                opacity: 0;
+                transform: translateY(3px);
+                -webkit-mask-position: 100% 0;
+                mask-position: 100% 0;
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+                -webkit-mask-position: 0% 0;
+                mask-position: 0% 0;
+            }
+        }
+
         /* --- RESPONSIVE --- */
         @media(max-width: 768px) {
             h1 { font-size: 2rem; }
-            .container { padding: 2rem 1rem; }
+            .container { padding: 6.5rem 1rem 2rem; }
             .result-box { padding: 2rem 1.5rem; }
             .ai-line { font-size: 1.02rem; }
             .ai-line.is-header { font-size: 1.25rem; }
             .ai-line.is-sub-header { font-size: 1.1rem; }
+            .demo-toolbar { flex-direction: column; gap: 0.75rem; padding-bottom: 1rem; }
         }
 
         @media(max-width: 480px) {
@@ -332,13 +612,51 @@
             .preview-image-container { width: 180px; height: 180px; }
             .top-copy-btn { top: -18px; right: 1rem; width: 34px; height: 34px; }
             .top-copy-btn i { font-size: 1rem; }
+            .demo-loading-image-wrapper { width: 240px; height: 240px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
+    <!-- ===================================================
+         DEMO TOOLBAR
+    =================================================== -->
+    <div class="demo-toolbar" id="demoToolbar">
+        <span class="toolbar-info">
+            <i class="fa-solid fa-circle-info"></i> Info: Reset if you see bugs and stuff
+        </span>
+        <button class="reset-btn" id="resetBtn">
+            <i class="fa-solid fa-rotate-right"></i> Reset
+        </button>
+        <button class="record-demo-btn" id="recordDemoBtn">
+            <span class="btn-dot"></span>
+            Start
+        </button>
+    </div>
+
+    <!-- ===================================================
+         FADE OVERLAY
+    =================================================== -->
+    <div id="demoFadeOverlay"></div>
+
+    <!-- ===================================================
+         LOADING SCREEN
+    =================================================== -->
+    <div id="demoLoadingScreen">
+        <div class="demo-loading-container">
+            <div class="demo-loading-image-wrapper" id="demoImageWrapper">
+                <img id="demoLoadingImage" class="demo-loading-image" src="" alt="Analyzing">
+                <div class="demo-dark-overlay"></div>
+                <div class="demo-shimmer-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================
+         MAIN PAGE
+    =================================================== -->
+    <div class="container" id="mainContainer">
+        <header id="pageHeader">
             <h1 id="mainTitle" contenteditable="true" spellcheck="false">FaceAid's Analysis</h1>
         </header>
 
@@ -358,7 +676,7 @@
         <div class="results-container">
             <div class="result-box" id="resultBox">
                 
-                <button class="top-copy-btn" title="Copy to clipboard" contenteditable="false">
+                <button class="top-copy-btn" id="copyBtn" title="Copy to clipboard" contenteditable="false">
                     <i class="fa-regular fa-clipboard"></i>
                 </button>
 
@@ -396,26 +714,36 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
 
     <script>
         /* =====================================================
-           DOM ELEMENTS & CONSTANTS
+           CONSTANTS & DOM
         ===================================================== */
-        const COLLAPSED_HEIGHT = 150; // px
-        const dropzone = document.getElementById('dropzone');
-        const fileInput = document.getElementById('fileInput');
-        const previewImage = document.getElementById('previewImage');
+        const COLLAPSED_HEIGHT  = 125; 
+        const dropzone          = document.getElementById('dropzone');
+        const fileInput         = document.getElementById('fileInput');
+        const previewImage      = document.getElementById('previewImage');
         const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const copyBtn           = document.getElementById('copyBtn');
+        const resetBtn          = document.getElementById('resetBtn');
 
         /* =====================================================
-           STATE MANAGEMENT (LOCAL STORAGE)
+           RESET FUNCTIONALITY
+        ===================================================== */
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                localStorage.removeItem('faceAid_title');
+                localStorage.removeItem('faceAid_content');
+                localStorage.removeItem('faceAid_image');
+                window.location.reload();
+            });
+        }
+
+        /* =====================================================
+           STATE (LOCAL STORAGE)
         ===================================================== */
         function saveState() {
             try {
-                const title = document.getElementById('mainTitle').innerHTML;
-                const content = document.getElementById('resultContent').innerHTML;
-                localStorage.setItem('faceAid_title', title);
-                localStorage.setItem('faceAid_content', content);
-            } catch (err) {
-                console.warn("Storage exception", err);
-            }
+                localStorage.setItem('faceAid_title',   document.getElementById('mainTitle').innerHTML);
+                localStorage.setItem('faceAid_content', document.getElementById('resultContent').innerHTML);
+            } catch (err) { console.warn('Storage exception', err); }
         }
 
         function rebindAccordions() {
@@ -424,169 +752,20 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
                 if (!wrapper) return;
                 const body = wrapper.querySelector('.section-body');
                 if (!body) return;
-
-                // FIX: If restored from local storage before fade-in completed, force them visible!
                 body.classList.add('visible');
-
-                // Replace to wipe out old inactive listeners
-                const newBtn = btn.cloneNode(true);
-                newBtn.classList.add('is-ready'); // FIX: Ensure button is visible!
-                btn.parentNode.replaceChild(newBtn, btn);
-
-                newBtn.addEventListener('click', () => {
-                    const expanded = body.classList.contains('expanded');
-                    if (!expanded) {
-                        body.classList.add('expanded');
-                        body.style.maxHeight = body.scrollHeight + 400 + 'px';
-                        newBtn.classList.add('is-expanded');
-                        newBtn.querySelector('span').textContent = 'Show Less';
-                    } else {
-                        body.classList.remove('expanded');
-                        body.style.maxHeight = COLLAPSED_HEIGHT + 'px';
-                        newBtn.classList.remove('is-expanded');
-                        newBtn.querySelector('span').textContent = 'Show More';
-                    }
-                    saveState();
-                });
-
-                const el = body.querySelector('.ai-line');
-                if (el) {
-                    el.addEventListener('input', () => {
-                        if (body.classList.contains('expanded')) {
-                            body.style.maxHeight = body.scrollHeight + 400 + 'px';
-                        }
-                    });
-                }
+                const fresh = btn.cloneNode(true);
+                fresh.classList.add('is-ready');
+                btn.parentNode.replaceChild(fresh, btn);
+                bindToggleBtn(fresh, body);
             });
         }
 
-        function loadState() {
-            const savedTitle = localStorage.getItem('faceAid_title');
-            const savedContent = localStorage.getItem('faceAid_content');
-            const savedImage = localStorage.getItem('faceAid_image');
-
-            if (savedTitle) document.getElementById('mainTitle').innerHTML = savedTitle;
-            if (savedContent) document.getElementById('resultContent').innerHTML = savedContent;
-            
-            if (savedImage) {
-                previewImage.src = savedImage;
-                previewImage.style.display = 'block';
-                uploadPlaceholder.style.display = 'none';
-                dropzone.classList.add('has-image');
-            }
-
-            rebindAccordions();
-        }
-
-        /* =====================================================
-           IMAGE UPLOAD
-        ===================================================== */
-        dropzone.addEventListener('click', () => fileInput.click());
-
-        dropzone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropzone.style.borderColor = 'var(--accent)';
-            dropzone.style.background = 'rgba(255,255,255,0.1)';
-        });
-
-        dropzone.addEventListener('dragleave', () => {
-            if (!dropzone.classList.contains('has-image'))
-                dropzone.style.borderColor = 'rgba(255,255,255,0.2)';
-            dropzone.style.background = 'rgba(255,255,255,0.03)';
-        });
-
-        dropzone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (e.dataTransfer.files && e.dataTransfer.files[0])
-                handleFile(e.dataTransfer.files[0]);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0])
-                handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const originalUrl = e.target.result;
-                
-                // Show Immediately
-                previewImage.src = originalUrl;
-                previewImage.style.display = 'block';
-                uploadPlaceholder.style.display = 'none';
-                dropzone.classList.add('has-image');
-
-                // Compress & Save (prevents LocalStorage 5MB quota errors)
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width;
-                    let h = img.height;
-                    const MAX = 800; 
-                    
-                    if (w > h && w > MAX) { h *= MAX / w; w = MAX; }
-                    else if (h > MAX) { w *= MAX / h; h = MAX; }
-                    
-                    canvas.width = w; canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
-                    
-                    try {
-                        localStorage.setItem('faceAid_image', canvas.toDataURL('image/jpeg', 0.8));
-                    } catch (err) {
-                        console.warn("Storage quota exceeded", err);
-                    }
-                };
-                img.src = originalUrl;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        /* =====================================================
-           COPY BUTTON
-        ===================================================== */
-        document.querySelector('.top-copy-btn').addEventListener('click', function () {
-            const text = document.getElementById('resultContent').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                const icon = this.querySelector('i');
-                icon.className = 'fa-solid fa-check';
-                setTimeout(() => { icon.className = 'fa-regular fa-clipboard'; }, 2000);
-            });
-        });
-
-        /* =====================================================
-           SHOW MORE ACCORDION CREATION
-        ===================================================== */
-        function convertToShowMore(el, prefillText) {
-            const parent = el.parentNode;
-            const nextSib = el.nextSibling; 
-
-            el.innerHTML = prefillText || '';
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'show-more-wrapper';
-
-            const body = document.createElement('div');
-            body.className = 'section-body'; 
-            body.style.maxHeight = COLLAPSED_HEIGHT + 'px';
-
-            body.appendChild(el);
-            wrapper.appendChild(body);
-            parent.insertBefore(wrapper, nextSib); 
-
-            const btn = document.createElement('button');
-            btn.className = 'section-toggle-btn'; 
-            btn.contentEditable = 'false';
-            btn.innerHTML = '<span>Show More</span><i class="fa-solid fa-chevron-down"></i>';
-            wrapper.appendChild(btn);
-
+        function bindToggleBtn(btn, body) {
             btn.addEventListener('click', () => {
                 const expanded = body.classList.contains('expanded');
                 if (!expanded) {
                     body.classList.add('expanded');
-                    body.style.maxHeight = body.scrollHeight + 400 + 'px';
+                    body.style.maxHeight = body.scrollHeight + 400 + 'px'; 
                     btn.classList.add('is-expanded');
                     btn.querySelector('span').textContent = 'Show Less';
                 } else {
@@ -597,20 +776,121 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
                 }
                 saveState();
             });
+            const el = body.querySelector('.ai-line');
+            if (el) {
+                el.addEventListener('input', () => {
+                    if (body.classList.contains('expanded'))
+                        body.style.maxHeight = body.scrollHeight + 400 + 'px';
+                });
+            }
+        }
 
-            el.addEventListener('input', () => {
-                if (body.classList.contains('expanded')) {
-                    body.style.maxHeight = body.scrollHeight + 400 + 'px';
-                }
+        function loadState() {
+            const savedTitle   = localStorage.getItem('faceAid_title');
+            const savedContent = localStorage.getItem('faceAid_content');
+            const savedImage   = localStorage.getItem('faceAid_image');
+            if (savedTitle)   document.getElementById('mainTitle').innerHTML = savedTitle;
+            if (savedContent) document.getElementById('resultContent').innerHTML = savedContent;
+            if (savedImage) {
+                previewImage.src = savedImage;
+                previewImage.style.display = 'block';
+                uploadPlaceholder.style.display = 'none';
+                dropzone.classList.add('has-image');
+            }
+            rebindAccordions();
+        }
+
+        /* =====================================================
+           IMAGE UPLOAD
+        ===================================================== */
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropzone.style.borderColor = 'var(--accent)';
+            dropzone.style.background  = 'rgba(255,255,255,0.1)';
+        });
+        dropzone.addEventListener('dragleave', () => {
+            if (!dropzone.classList.contains('has-image'))
+                dropzone.style.borderColor = 'rgba(255,255,255,0.2)';
+            dropzone.style.background = 'rgba(255,255,255,0.03)';
+        });
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', e => {
+            if (e.target.files?.[0]) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const url = e.target.result;
+                previewImage.src = url;
+                previewImage.style.display = 'block';
+                uploadPlaceholder.style.display = 'none';
+                dropzone.classList.add('has-image');
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const MAX = 800;
+                    if (w > h && w > MAX) { h *= MAX / w; w = MAX; }
+                    else if (h > MAX)     { w *= MAX / h; h = MAX; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    try { localStorage.setItem('faceAid_image', canvas.toDataURL('image/jpeg', 0.8)); }
+                    catch (err) { console.warn('Storage quota exceeded', err); }
+                };
+                img.src = url;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* =====================================================
+           COPY BUTTON
+        ===================================================== */
+        copyBtn.addEventListener('click', function () {
+            const text = document.getElementById('resultContent').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = this.querySelector('i');
+                icon.className = 'fa-solid fa-check';
+                setTimeout(() => { icon.className = 'fa-regular fa-clipboard'; }, 2000);
             });
+        });
 
-            // Trigger animations
+        /* =====================================================
+           SHOW MORE — creation
+        ===================================================== */
+        function convertToShowMore(el, prefillText) {
+            const parent  = el.parentNode;
+            const nextSib = el.nextSibling;
+            el.innerHTML  = prefillText || '';
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'show-more-wrapper';
+
+            const body = document.createElement('div');
+            body.className = 'section-body';
+            body.style.maxHeight = COLLAPSED_HEIGHT + 'px';
+            body.appendChild(el);
+            wrapper.appendChild(body);
+            parent.insertBefore(wrapper, nextSib);
+
+            const btn = document.createElement('button');
+            btn.className = 'section-toggle-btn';
+            btn.contentEditable = 'false';
+            btn.innerHTML = '<span>Show More</span><i class="fa-solid fa-chevron-down"></i>';
+            wrapper.appendChild(btn);
+
+            bindToggleBtn(btn, body);
+
             requestAnimationFrame(() => requestAnimationFrame(() => {
-                body.classList.add('visible');          
-                setTimeout(() => btn.classList.add('is-ready'), 500); 
+                body.classList.add('visible');
+                setTimeout(() => btn.classList.add('is-ready'), 500);
             }));
 
-            // Reset focus
             el.focus();
             const r = document.createRange();
             r.selectNodeContents(el);
@@ -618,12 +898,11 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
             const s = window.getSelection();
             s.removeAllRanges();
             s.addRange(r);
-
             saveState();
         }
 
         /* =====================================================
-           LIVE MARKDOWN + &s TRIGGER ENGINE
+           LIVE MARKDOWN ENGINE
         ===================================================== */
         function applyMarkdown(text) {
             text = text.replace(/\*\*(.*?)\*\*/g, '___B___$1___/B___');
@@ -642,61 +921,49 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
                 document.execCommand('insertHTML', false, text);
                 saveState();
             });
-
             el.addEventListener('keyup', function (e) {
                 if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
-
                 if (this.innerText.includes('&s')) {
-                    // FIX: Prevent nesting breaking everything!
                     if (this.closest('.show-more-wrapper')) {
                         this.innerHTML = this.innerHTML.replace(/&amp;s/g, '').replace(/&s/g, '');
                         const r = document.createRange();
                         r.selectNodeContents(this);
                         r.collapse(false);
-                        const s = window.getSelection();
-                        s.removeAllRanges();
-                        s.addRange(r);
+                        window.getSelection().removeAllRanges();
+                        window.getSelection().addRange(r);
                         saveState();
-                        return; // Halt immediately so it doesn't wrap again!
+                        return;
                     }
-
-                    const cleaned = this.innerText.replace('&s', '').trimEnd();
-                    const prefill = cleaned
-                        ? cleaned.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
+                    const cleaned  = this.innerText.replace('&s', '').trimEnd();
+                    const prefill  = cleaned
+                        ? cleaned.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
                         : '';
                     convertToShowMore(this, prefill);
                     return;
                 }
-
                 let html = this.innerHTML;
                 if (!html.includes('*')) return;
-
-                const boldCount  = (html.match(/\*\*/g) || []).length;
+                const boldCount   = (html.match(/\*\*/g) || []).length;
                 const italicCount = (html.replace(/\*\*/g, '').match(/\*/g) || []).length;
-
                 if (boldCount % 2 === 0 && italicCount % 2 === 0) {
                     let sel = window.getSelection();
                     if (!sel.rangeCount) return;
-                    let range = sel.getRangeAt(0);
+                    let range  = sel.getRangeAt(0);
                     let marker = document.createElement('span');
-                    marker.id = 'caret-marker';
+                    marker.id  = 'caret-marker';
                     range.insertNode(marker);
-
-                    let htmlWithMarker = this.innerHTML;
-                    let formatted = applyMarkdown(htmlWithMarker);
-
-                    if (htmlWithMarker !== formatted) {
+                    let formatted = applyMarkdown(this.innerHTML);
+                    if (this.innerHTML !== formatted) {
                         this.innerHTML = formatted;
                         saveState();
                     }
-
                     let restored = document.getElementById('caret-marker');
                     if (restored) {
-                        let newRange = document.createRange();
-                        newRange.setStartAfter(restored);
-                        newRange.collapse(true);
+                        let nr = document.createRange();
+                        nr.setStartAfter(restored);
+                        nr.collapse(true);
                         sel.removeAllRanges();
-                        sel.addRange(newRange);
+                        sel.addRange(nr);
                         restored.remove();
                     }
                 }
@@ -704,34 +971,192 @@ The sides are cut with clippers, staying relatively short but not quite buzzed. 
         }
 
         /* =====================================================
-           INITIALIZATION & OBSERVERS
+           DEMO REPLAY ENGINE
         ===================================================== */
-        
-        // 1. Load the exact state on refresh before applying logic to newly loaded content
+        const recordDemoBtn     = document.getElementById('recordDemoBtn');
+        const demoToolbar       = document.getElementById('demoToolbar');
+        const demoFadeOverlay   = document.getElementById('demoFadeOverlay');
+        const demoLoadingScreen = document.getElementById('demoLoadingScreen');
+        const demoLoadingImage  = document.getElementById('demoLoadingImage');
+        const demoImageWrapper  = document.getElementById('demoImageWrapper');
+
+        let demoRunning = false;
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function resetContentForReplay() {
+            const header     = document.getElementById('pageHeader');
+            const previewSec = document.getElementById('previewSection');
+            const resultBox  = document.getElementById('resultBox');
+            const lines      = document.querySelectorAll('#resultContent .ai-line');
+            const toggleBtns = document.querySelectorAll('#resultContent .section-toggle-btn');
+
+            [header, previewSec, resultBox].forEach(el => {
+                el.style.transition = 'none';
+                el.style.opacity    = '0';
+                el.style.transform  = 'translateY(18px)';
+            });
+
+            copyBtn.style.transition = 'none';
+            copyBtn.style.opacity    = '0';
+
+            lines.forEach(line => {
+                line.classList.remove('animate-reveal');
+                void line.offsetWidth;
+                line.style.opacity         = '0';
+                line.style.transform       = 'translateY(3px)';
+                line.style.webkitMaskImage = '';
+                line.style.maskImage       = '';
+            });
+
+            toggleBtns.forEach(btn => {
+                btn.classList.remove('is-ready');
+                btn.style.transition = 'none';
+                btn.style.opacity    = '0'; // Crucial inline reset
+            });
+        }
+
+        function revealLine(el) {
+            el.style.opacity         = '';
+            el.style.transform       = '';
+            el.style.webkitMaskImage = '';
+            el.style.maskImage       = '';
+            el.classList.remove('animate-reveal');
+            void el.offsetWidth;
+            el.classList.add('animate-reveal');
+
+            el.addEventListener('animationend', function handler(e) {
+                if (e.animationName === 'geminiSwipe') {
+                    el.style.webkitMaskImage = 'none';
+                    el.style.maskImage       = 'none';
+                    el.classList.remove('animate-reveal');
+                    el.removeEventListener('animationend', handler);
+                }
+            });
+        }
+
+        recordDemoBtn.addEventListener('click', async () => {
+            if (demoRunning) return;
+            demoRunning = true;
+
+            // 1. Hide toolbar (will NOT come back after)
+            demoToolbar.classList.add('hidden');
+            await delay(800);
+
+            // 2. Fade to completely black
+            demoFadeOverlay.classList.add('visible');
+            await delay(550);
+
+            // 3. Reset all UI elements behind the black screen
+            resetContentForReplay();
+            window.scrollTo({ top: 0, behavior: 'instant' });
+
+            const imgSrc = previewImage.src;
+            const hasImage = previewImage.style.display !== 'none' && imgSrc && !imgSrc.endsWith(window.location.host + '/');
+
+            if (hasImage) {
+                demoLoadingImage.src = imgSrc;
+                demoLoadingImage.style.display = 'block';
+            } else {
+                demoLoadingImage.src = '';
+                demoLoadingImage.style.display = 'none';
+            }
+
+            demoImageWrapper.classList.remove('fading-out');
+            void demoImageWrapper.offsetWidth; 
+
+            // Turn on the loading screen and its shimmer logic
+            demoLoadingScreen.classList.add('active');
+            demoLoadingScreen.classList.add('shimmer-active');
+
+            // 4. Fade out the black overlay to show the loading screen smoothly
+            await delay(60);
+            demoFadeOverlay.classList.remove('visible');
+
+            // 5. Shimmer duration
+            await delay(3500);
+
+            // 6. Smooth image fade out
+            demoImageWrapper.classList.add('fading-out');
+            await delay(450); 
+
+            // 7. Instant fade to black to swap screens without extra delay
+            demoFadeOverlay.classList.add('visible');
+            await delay(200);
+
+            demoLoadingScreen.classList.remove('active');
+            demoLoadingScreen.classList.remove('shimmer-active');
+
+            // 8. Instantly fade away black overlay to reveal UI framework
+            demoFadeOverlay.classList.remove('visible');
+            await delay(350);
+
+            const header     = document.getElementById('pageHeader');
+            const previewSec = document.getElementById('previewSection');
+            const resultBox  = document.getElementById('resultBox');
+
+            header.style.transition     = 'opacity 0.65s ease, transform 0.65s ease';
+            previewSec.style.transition = 'opacity 0.7s ease 0.12s, transform 0.7s ease 0.12s';
+            resultBox.style.transition  = 'opacity 0.75s ease 0.26s, transform 0.75s ease 0.26s';
+
+            header.style.opacity       = '1';
+            header.style.transform     = 'translateY(0)';
+            previewSec.style.opacity   = '1';
+            previewSec.style.transform = 'translateY(0)';
+            resultBox.style.opacity    = '1';
+            resultBox.style.transform  = 'translateY(0)';
+
+            await delay(420);
+            copyBtn.style.transition = 'opacity 0.5s ease';
+            copyBtn.style.opacity    = '1';
+
+            // 9. Reveal lines
+            await delay(200);
+            const lines = document.querySelectorAll('#resultContent .ai-line');
+            for (const line of lines) {
+                revealLine(line);
+
+                const len = line.innerText.length;
+                const dur = 220 + Math.random() * 80 + Math.min(len * 1.2, 260) + 100;
+                await delay(dur);
+
+                const wrapper = line.closest('.show-more-wrapper');
+                if (wrapper) {
+                    const btn = wrapper.querySelector('.section-toggle-btn');
+                    // FIX: Force opacity inline style to 1 so the class override works properly
+                    if (btn && btn.style.opacity === '0') {
+                        btn.style.transition = 'opacity 0.4s ease';
+                        btn.style.opacity = '1';
+                        btn.classList.add('is-ready');
+                    }
+                }
+            }
+
+            demoRunning = false;
+        });
+
+        /* =====================================================
+           INIT
+        ===================================================== */
         loadState();
 
-        // 2. Global delegate to detect ANY edits automatically and save state instantly
-        document.addEventListener('input', (e) => {
-            if (e.target.hasAttribute('contenteditable')) {
-                saveState();
-            }
+        document.addEventListener('input', e => {
+            if (e.target.hasAttribute('contenteditable')) saveState();
         });
 
-        // 3. Attach markdown functionality to all currently rendered contenteditable items
         document.querySelectorAll('[contenteditable="true"]').forEach(attachEditorHandlers);
 
-        // 4. MutationObserver for dynamic "Show More" accordion creations
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
+        new MutationObserver(mutations => {
+            mutations.forEach(m => {
+                m.addedNodes.forEach(node => {
                     if (node.nodeType !== 1) return;
                     if (node.contentEditable === 'true') attachEditorHandlers(node);
-                    node.querySelectorAll && node.querySelectorAll('[contenteditable="true"]').forEach(attachEditorHandlers);
+                    node.querySelectorAll?.('[contenteditable="true"]').forEach(attachEditorHandlers);
                 });
             });
-        });
-        observer.observe(document.getElementById('resultContent'), { childList: true, subtree: true });
-
+        }).observe(document.getElementById('resultContent'), { childList: true, subtree: true });
     </script>
 </body>
 </html>
