@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -186,18 +185,16 @@
             cursor: text;
             transition: background 0.2s, background-color 0.2s;
             border-radius: 6px;
-            -webkit-tap-highlight-color: transparent; /* Removes touch highlight color on mobile */
-            caret-color: var(--accent); /* Consistent cursor color */
+            -webkit-tap-highlight-color: transparent;
+            caret-color: var(--accent);
         }
 
-        /* Target devices that support hover interaction to prevent sticky mobile states */
         @media (hover: hover) {
             [contenteditable="true"]:hover {
                 background: rgba(255, 255, 255, 0.03);
             }
         }
 
-        /* Prevent any default browser highlighting, active-tap shifts, or stuck colors on focus */
         [contenteditable="true"]:focus,
         [contenteditable="true"]:active {
             outline: none !important;
@@ -368,7 +365,7 @@
         em { font-style: italic; }
 
         /* ================================================
-           SHOW MORE ACCORDION (Fixed Tighter Spacing)
+           SHOW MORE ACCORDION 
         ================================================ */
         .show-more-wrapper {
             display: block;
@@ -386,7 +383,6 @@
             opacity: 1;
         }
 
-        /* Slightly shorter mask to prevent large transparent gap */
         .section-body:not(.expanded) {
             -webkit-mask-image: linear-gradient(to bottom, black 0px, black 60px, transparent 125px);
             mask-image: linear-gradient(to bottom, black 0px, black 60px, transparent 125px);
@@ -410,11 +406,8 @@
             padding: 0;
             border-radius: 0;
             cursor: pointer;
-            
-            /* TUCK THE BUTTON IN TIGHTLY */
             margin-top: -1.25rem;
             margin-bottom: -0.5rem; 
-            
             position: relative;
             z-index: 10;
             opacity: 1; 
@@ -452,7 +445,7 @@
             z-index: 8000;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.25s ease; /* Faster transitions for zero lag */
+            transition: opacity 0.25s ease;
         }
         #demoFadeOverlay.visible {
             opacity: 1;
@@ -465,7 +458,7 @@
         #demoLoadingScreen {
             position: fixed;
             inset: 0;
-            background: var(--bg-primary);
+            /* Background completely removed so it overlays cleanly without alpha blink! */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -479,14 +472,6 @@
             opacity: 1;
             visibility: visible;
             pointer-events: all;
-        }
-
-        #demoLoadingScreen::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: var(--bg-gradient);
-            z-index: -1;
         }
 
         .demo-loading-container {
@@ -1032,7 +1017,7 @@
             toggleBtns.forEach(btn => {
                 btn.classList.remove('is-ready');
                 btn.style.transition = 'none';
-                btn.style.opacity    = '0'; // Crucial inline reset
+                btn.style.opacity    = '0';
             });
         }
 
@@ -1061,11 +1046,11 @@
 
             // 1. Hide toolbar (will NOT come back after)
             demoToolbar.classList.add('hidden');
-            await delay(800);
+            await delay(400); // Sped up
 
             // 2. Fade to completely black
             demoFadeOverlay.classList.add('visible');
-            await delay(550);
+            await delay(300); // Guarantees smooth transition without blinking background
 
             // 3. Reset all UI elements behind the black screen
             document.getElementById('mainContainer').classList.add('demo-started');
@@ -1091,27 +1076,21 @@
             demoLoadingScreen.classList.add('shimmer-active');
 
             // 4. Fade out the black overlay to show the loading screen smoothly
-            await delay(60);
+            await delay(50);
             demoFadeOverlay.classList.remove('visible');
 
-            // 5. Shimmer duration
-            await delay(3500);
+            // 5. Shimmer duration (reduced wait time)
+            await delay(2000);
 
             // 6. Smooth image fade out
             demoImageWrapper.classList.add('fading-out');
-            await delay(450); 
+            await delay(400); 
 
-            // 7. Instant fade to black to swap screens without extra delay
-            demoFadeOverlay.classList.add('visible');
-            await delay(200);
-
+            // 7. Remove loading screen - no black fade needed here! Zero blinks and faster!
             demoLoadingScreen.classList.remove('active');
             demoLoadingScreen.classList.remove('shimmer-active');
 
-            // 8. Instantly fade away black overlay to reveal UI framework
-            demoFadeOverlay.classList.remove('visible');
-            await delay(350);
-
+            // 8. Start sliding up the UI immediately
             const header     = document.getElementById('pageHeader');
             const previewSec = document.getElementById('previewSection');
             const resultBox  = document.getElementById('resultBox');
@@ -1127,24 +1106,23 @@
             resultBox.style.opacity    = '1';
             resultBox.style.transform  = 'translateY(0)';
 
-            await delay(420);
+            await delay(350);
             copyBtn.style.transition = 'opacity 0.5s ease';
             copyBtn.style.opacity    = '1';
 
-            // 9. Reveal lines
-            await delay(200);
+            // 9. Reveal text lines smoothly
+            await delay(150);
             const lines = document.querySelectorAll('#resultContent .ai-line');
             for (const line of lines) {
                 revealLine(line);
 
                 const len = line.innerText.length;
-                const dur = 220 + Math.random() * 80 + Math.min(len * 1.2, 260) + 100;
+                const dur = 180 + Math.random() * 60 + Math.min(len * 0.9, 220); // Slightly faster text pacing
                 await delay(dur);
 
                 const wrapper = line.closest('.show-more-wrapper');
                 if (wrapper) {
                     const btn = wrapper.querySelector('.section-toggle-btn');
-                    // FIX: Force opacity inline style to 1 so the class override works properly
                     if (btn && btn.style.opacity === '0') {
                         btn.style.transition = 'opacity 0.4s ease';
                         btn.style.opacity = '1';
