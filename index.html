@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,6 +28,10 @@
             --border:       rgba(255, 255, 255, 0.1);
             --shadow-md:    0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0px rgba(255, 255, 255, 0.04);
             --font-main:    'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            
+            /* Dynamic Highlight Variables */
+            --highlight-bg: #cba938;
+            --highlight-fg: #111111;
         }
 
         * {
@@ -112,6 +117,79 @@
         }
         .reset-btn:active {
             transform: translateY(0);
+        }
+
+        /* --- HIGHLIGHT CONTROLS --- */
+        .highlight-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.35rem 0.8rem;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.15);
+            transition: .3s;
+            border-radius: 34px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--accent);
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(14px);
+        }
+
+        input[type="color"]#highlightColor {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+            overflow: hidden;
+            outline: none;
+        }
+        input[type="color"]#highlightColor::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]#highlightColor::-webkit-color-swatch {
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+        }
+        input[type="color"]#highlightColor::-moz-color-swatch {
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
         }
 
         .record-demo-btn {
@@ -308,8 +386,6 @@
             border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .top-copy-btn i { font-size: 1.1rem; }
-
         /* --- RESULT CONTENT --- */
         .result-content {
             line-height: 1.5;
@@ -348,13 +424,48 @@
             margin-top: 0 !important; 
         }
 
+        /* --- DYNAMIC HIGHLIGHT STYLING --- */
         .ai-line.is-sub-header {
             font-size: 1.2rem;
             font-weight: 700;
-            color: var(--fg-primary);
+            color: var(--fg-primary); /* Starts as normal white/light text */
             margin-bottom: 0.2rem !important;
             margin-top: 0 !important;
             line-height: 1.3;
+            
+            /* Structural tweaks for perfect highlight hugging */
+            position: relative;
+            width: fit-content;
+            max-width: 100%;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            margin-left: -0.6rem; /* offsets padding to keep aligned with paragraph */
+            z-index: 1;
+            
+            /* Slower color text transition to smoothly match the delayed wipe */
+            transition: color 0.8s ease 0.4s;
+        }
+
+        .ai-line.is-sub-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 6px;
+            z-index: -1;
+            background-color: var(--highlight-bg);
+            /* Wipe animation configuration */
+            transform-origin: left center;
+            transform: scaleX(0);
+            /* Professional editing software marker wipe: buttery slow ease-out over 2.0s */
+            transition: transform 2.0s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .ai-line.is-sub-header.do-highlight {
+            color: var(--highlight-fg) !important;
+        }
+
+        .ai-line.is-sub-header.do-highlight::before {
+            transform: scaleX(1);
         }
 
         .highlight-bold {
@@ -458,7 +569,6 @@
         #demoLoadingScreen {
             position: fixed;
             inset: 0;
-            /* Background completely removed so it overlays cleanly without alpha blink! */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -636,6 +746,16 @@
         <button class="reset-btn" id="resetBtn">
             <i class="fa-solid fa-rotate-right"></i> Reset
         </button>
+        
+        <div class="highlight-controls">
+            <label class="toggle-switch">
+                <input type="checkbox" id="highlightToggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toolbar-info" style="margin-left: -0.2rem; font-weight: 600; color: #fff;">Highlight</span>
+            <input type="color" id="highlightColor" value="#6b6345" title="Pick Highlight Color">
+        </div>
+
         <button class="record-demo-btn" id="recordDemoBtn">
             <span class="btn-dot"></span>
             Start
@@ -691,23 +811,23 @@
                 <div id="resultContent" class="result-content">
                     
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Hairstyle Suggestion</h3>
-                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Textured Crop Fade</div>
+                    <div class="ai-line is-sub-header do-highlight" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Textured Crop Fade</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">A <span class="highlight-bold">textured crop fade</span> would suit your features really well, since it adds structure on top while keeping things clean and tight on the sides. The sides and back are faded down gradually with clippers, getting progressively shorter toward the skin, while the top is left longer at around <span class="highlight-bold">two to three inches</span> to allow for natural movement and texture. Style it forward or slightly to the side using a <span class="highlight-bold">matte paste or clay</span> for a soft, lived-in finish rather than a slick or shiny look, and avoid heavy gels that can flatten the texture you're going for. This cut is incredibly low-maintenance day to day, requiring just a quick scrunch or finger-comb in the morning, but it also cleans up nicely with minimal effort for sharper occasions, making it one of the most versatile options for your face shape and hair type.</p>
 
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Outfit Suggestion</h3>
-                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Sharp &amp; Versatile</div>
+                    <div class="ai-line is-sub-header do-highlight" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Sharp &amp; Versatile</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Your build and proportions respond really well to structured, well-fitted pieces rather than oversized or baggy silhouettes, since clean lines help balance your frame and give a more put-together impression at a glance. A <span class="highlight-bold">tailored bomber jacket</span> layered over a plain crewneck tee is an easy way to instantly elevate a casual outfit without trying too hard, and it works across seasons when paired correctly. On the bottom, <span class="highlight-bold">slim-fit chinos or dark denim</span> create a streamlined look that pairs nicely with the jacket, and finishing with minimalist leather sneakers in white, black, or tan keeps the overall palette cohesive and modern. For colder days, swap the tee for a fine-knit turtleneck under the jacket to add a touch of refinement, and consider a structured watch or a simple leather belt as small details that tie the whole outfit together without overcomplicating it.</p>
 
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Custom Skincare Routine</h3>
-                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Hydration Focused</div>
+                    <div class="ai-line is-sub-header do-highlight" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Hydration Focused</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Your skin appears to have a <span class="highlight-bold">combination profile</span>, meaning some areas like the forehead and nose may produce more oil while the lower cheeks show slight signs of dehydration and tightness, especially after washing. Start your morning routine with a <span class="highlight-bold">gentle hydrating cleanser</span> that won't strip your skin's natural oils, followed by a <span class="highlight-bold">Vitamin C serum</span> to help brighten the complexion and even out any unevenness in tone over time. Once the serum has absorbed, apply a <span class="highlight-bold">lightweight, oil-free moisturizer</span> to lock in hydration without feeling heavy, and always finish with a broad-spectrum <span class="highlight-bold">SPF 50</span> sunscreen to protect against sun damage and premature aging. In the evening, repeat the cleansing step and consider introducing a gentle exfoliant two to three times a week to keep your pores clear and your skin texture smooth and even.</p>
 
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Colors &amp; Style</h3>
-                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Deep &amp; Bold Contrast</div>
+                    <div class="ai-line is-sub-header do-highlight" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Deep &amp; Bold Contrast</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Your <span class="highlight-bold">cool undertones and higher contrast</span> features mean rich, saturated colors will generally look better on you than washed-out pastels, which can sometimes make your complexion appear flat or dull by comparison. Build the foundation of your wardrobe around <span class="highlight-bold">deep navy blues, emerald greens, and charcoal grays</span>, as these jewel tones create a striking contrast against your skin and eyes while still being easy to mix and match across different outfits. Accent pieces in <span class="highlight-bold">burgundy, deep purple, or icy blue</span> can add variety without clashing, and metals like silver or platinum will generally suit you better than warm gold tones for jewelry or watch accents. When in doubt, darker and more saturated versions of any color will almost always be more flattering on you than lighter, muted, or pastel variations.</p>
 
                     <h3 class="ai-line is-header" contenteditable="true" spellcheck="false" data-placeholder="Heading goes here...">Grooming Advice</h3>
-                    <div class="ai-line is-sub-header" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Emphasizing The Jawline</div>
+                    <div class="ai-line is-sub-header do-highlight" contenteditable="true" spellcheck="false" data-placeholder="Sub-heading goes here...">Emphasizing The Jawline</div>
                     <p class="ai-line" contenteditable="true" spellcheck="false" data-placeholder="Paragraph goes here...">Keeping your facial hair trimmed to a neat <span class="highlight-bold">3 to 5mm stubble</span> is one of the easiest ways to enhance your jawline, since it adds a subtle shadow that emphasizes definition without covering up your strong natural bone structure underneath. Use a quality trimmer with a guard to maintain an even length across your cheeks, jaw, and neckline, and clean up any stray hairs along your cheekbones and neck every few days to keep the shape sharp and intentional rather than patchy or unkempt. Apply a few drops of <span class="highlight-bold">beard oil</span> daily after washing your face, massaging it into the skin underneath to prevent dryness, itchiness, and flaking, which is especially important if you're maintaining a shorter length. If you ever decide to grow it out slightly longer, make sure to brush it daily to train the direction of growth and keep it looking deliberate rather than messy.</p>
                     
                 </div>
@@ -726,6 +846,47 @@
         const uploadPlaceholder = document.getElementById('uploadPlaceholder');
         const copyBtn           = document.getElementById('copyBtn');
         const resetBtn          = document.getElementById('resetBtn');
+
+        /* =====================================================
+           HIGHLIGHT CONTROLS ENGINE
+        ===================================================== */
+        const highlightToggle = document.getElementById('highlightToggle');
+        const highlightColor  = document.getElementById('highlightColor');
+
+        // Dynamically calculate proper text contrast for maximum readability
+        function getContrast(hex) {
+            hex = hex.replace("#", "");
+            if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+            const r = parseInt(hex.substr(0,2),16);
+            const g = parseInt(hex.substr(2,2),16);
+            const b = parseInt(hex.substr(4,2),16);
+            const yiq = ((r*299)+(g*587)+(b*114))/1000;
+            return (yiq >= 128) ? '#111111' : '#ffffff';
+        }
+
+        function applyHighlightPreview() {
+            const root = document.documentElement;
+            const colorVal = highlightColor.value;
+            
+            // Apply styling variables to DOM
+            root.style.setProperty('--highlight-bg', colorVal);
+            root.style.setProperty('--highlight-fg', getContrast(colorVal));
+
+            // Instant preview for non-recording state
+            const subHeaders = document.querySelectorAll('.is-sub-header');
+            if (highlightToggle.checked) {
+                subHeaders.forEach(el => el.classList.add('do-highlight'));
+            } else {
+                subHeaders.forEach(el => el.classList.remove('do-highlight'));
+            }
+        }
+
+        highlightToggle.addEventListener('change', applyHighlightPreview);
+        highlightColor.addEventListener('input', applyHighlightPreview);
+        
+        // Init highlight colors based on default inputs
+        applyHighlightPreview();
+
 
         /* =====================================================
            RESET FUNCTIONALITY
@@ -793,7 +954,11 @@
             const savedContent = localStorage.getItem('faceAid_content');
             const savedImage   = localStorage.getItem('faceAid_image');
             if (savedTitle)   document.getElementById('mainTitle').innerHTML = savedTitle;
-            if (savedContent) document.getElementById('resultContent').innerHTML = savedContent;
+            if (savedContent) { 
+                document.getElementById('resultContent').innerHTML = savedContent;
+                // re-apply preview state to loaded content
+                applyHighlightPreview();
+            }
             if (savedImage) {
                 previewImage.src = savedImage;
                 previewImage.style.display = 'block';
@@ -995,6 +1160,7 @@
             const resultBox  = document.getElementById('resultBox');
             const lines      = document.querySelectorAll('#resultContent .ai-line');
             const toggleBtns = document.querySelectorAll('#resultContent .section-toggle-btn');
+            const subHeaders = document.querySelectorAll('#resultContent .is-sub-header');
 
             [header, previewSec, resultBox].forEach(el => {
                 el.style.transition = 'none';
@@ -1004,6 +1170,9 @@
 
             copyBtn.style.transition = 'none';
             copyBtn.style.opacity    = '0';
+
+            // Reset dynamic highlight styling classes specifically to prevent visibility flash
+            subHeaders.forEach(el => el.classList.remove('do-highlight'));
 
             lines.forEach(line => {
                 line.classList.remove('animate-reveal');
@@ -1046,11 +1215,11 @@
 
             // 1. Hide toolbar (will NOT come back after)
             demoToolbar.classList.add('hidden');
-            await delay(400); // Sped up
+            await delay(400); 
 
             // 2. Fade to completely black
             demoFadeOverlay.classList.add('visible');
-            await delay(300); // Guarantees smooth transition without blinking background
+            await delay(300); 
 
             // 3. Reset all UI elements behind the black screen
             document.getElementById('mainContainer').classList.add('demo-started');
@@ -1079,14 +1248,14 @@
             await delay(50);
             demoFadeOverlay.classList.remove('visible');
 
-            // 5. Shimmer duration (reduced wait time)
+            // 5. Shimmer duration
             await delay(2000);
 
             // 6. Smooth image fade out
             demoImageWrapper.classList.add('fading-out');
             await delay(400); 
 
-            // 7. Remove loading screen - no black fade needed here! Zero blinks and faster!
+            // 7. Remove loading screen
             demoLoadingScreen.classList.remove('active');
             demoLoadingScreen.classList.remove('shimmer-active');
 
@@ -1113,12 +1282,26 @@
             // 9. Reveal text lines smoothly
             await delay(150);
             const lines = document.querySelectorAll('#resultContent .ai-line');
+            
             for (const line of lines) {
+                
+                // Animate text reveal normally
                 revealLine(line);
 
                 const len = line.innerText.length;
-                const dur = 180 + Math.random() * 60 + Math.min(len * 0.9, 220); // Slightly faster text pacing
+                const dur = 180 + Math.random() * 60 + Math.min(len * 0.9, 220); 
+                
+                // Wait the normal staggered duration BEFORE moving to trigger the next text block below it
                 await delay(dur);
+
+                // HIGHLIGHT LOGIC: Non-blocking timeout! 
+                // Wait exactly 2.0s (this aligns with the text mask animation visibly finishing)
+                // The highlight will trigger concurrently while the next paragraphs continue animating.
+                if (highlightToggle.checked && line.classList.contains('is-sub-header')) {
+                    setTimeout(() => {
+                        line.classList.add('do-highlight');
+                    }, 1000); 
+                }
 
                 const wrapper = line.closest('.show-more-wrapper');
                 if (wrapper) {
@@ -1146,13 +1329,16 @@
         document.querySelectorAll('[contenteditable="true"]').forEach(attachEditorHandlers);
 
         new MutationObserver(mutations => {
+            let changed = false;
             mutations.forEach(m => {
                 m.addedNodes.forEach(node => {
                     if (node.nodeType !== 1) return;
+                    changed = true;
                     if (node.contentEditable === 'true') attachEditorHandlers(node);
                     node.querySelectorAll?.('[contenteditable="true"]').forEach(attachEditorHandlers);
                 });
             });
+            if (changed) applyHighlightPreview(); // ensure fresh nodes get correct style
         }).observe(document.getElementById('resultContent'), { childList: true, subtree: true });
     </script>
 </body>
