@@ -1,11 +1,9 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="color-scheme" content="dark">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FaceAid AI - Promo Generator</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,7 +71,7 @@
             justify-content: center;
             gap: 1.25rem;
             flex-wrap: wrap;
-            padding: 0.75rem 1.5rem;
+            padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.5rem 0.75rem;
             background: rgba(22, 22, 64, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -128,6 +126,7 @@
             padding: 0.35rem 0.8rem;
             border-radius: 50px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
         }
 
         .toggle-switch {
@@ -135,6 +134,7 @@
             display: inline-block;
             width: 34px;
             height: 20px;
+            flex-shrink: 0;
         }
         .toggle-switch input {
             opacity: 0;
@@ -181,6 +181,7 @@
             padding: 0;
             overflow: hidden;
             outline: none;
+            flex-shrink: 0;
         }
         input[type="color"]#highlightColor::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]#highlightColor::-webkit-color-swatch {
@@ -209,6 +210,7 @@
             box-shadow: 0 4px 20px rgba(168, 85, 247, 0.45);
             transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
             user-select: none;
+            white-space: nowrap;
         }
         .record-demo-btn:hover {
             transform: translateY(-2px);
@@ -238,6 +240,7 @@
             max-width: 720px;
             margin: 0 auto;
             padding: 7rem 1.5rem 3rem;
+            padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px));
             width: 100%;
             transition: padding-top 0.4s ease;
         }
@@ -307,6 +310,10 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            /* iOS Safari fix: forces the border-radius clip to apply correctly
+               on elements that participate in compositing (see wrapper below
+               for the full explanation). Cheap insurance here too. */
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
         }
 
         .preview-image-container:hover {
@@ -325,6 +332,7 @@
             pointer-events: none;
             z-index: 2;
             text-align: center;
+            padding: 0 1rem;
         }
         
         .upload-placeholder i {
@@ -588,11 +596,19 @@
             padding: 2rem;
         }
 
-        /* 
-           FIX APPLIED HERE: 
-           - Removed black background
-           - Removed buggy mask-image
-           - Added translateZ(0) to force clean border-radius clipping 
+        /*
+           THE SQUARE -> ROUND BUG, FIXED:
+           On iOS Safari, an element with overflow:hidden + border-radius
+           that ALSO has a CSS transform (translateZ, scale, etc.) is
+           promoted to its own compositing layer. Safari sometimes paints
+           that layer's first frame with square corners and only applies
+           the border-radius clip on the next repaint, which is exactly
+           the "square then curve" flash you saw.
+
+           Fix: -webkit-mask-image with a radial-gradient forces Safari to
+           run the corner clip through the masking pipeline instead of the
+           border-radius/overflow pipeline, which IS respected from the
+           very first frame regardless of compositing layers.
         */
         .demo-loading-image-wrapper {
             position: relative;
@@ -604,7 +620,10 @@
             background: transparent;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            transform: translateZ(0); 
+            transform: translateZ(0);
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            mask-image: radial-gradient(white, black);
+            isolation: isolate;
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
@@ -614,11 +633,6 @@
             transition: opacity 0.45s ease-out, transform 0.45s ease-out !important;
         }
 
-        /* 
-           FIX APPLIED HERE:
-           - Object-fit ensures the square ratio is perfectly respected
-           - Started scaled at 1.1 and rests at 1.02 to ensure it NEVER bleeds a black edge
-        */
         .demo-loading-image {
             width: 100%;
             height: 100%;
@@ -738,6 +752,31 @@
             .top-copy-btn { top: -18px; right: 1rem; width: 34px; height: 34px; }
             .top-copy-btn i { font-size: 1rem; }
             .demo-loading-image-wrapper { width: 240px; height: 240px; }
+        }
+
+        /* Small phones (iPhone SE / mini and similar, ~<=380px wide) */
+        @media(max-width: 380px) {
+            h1 { font-size: 1.5rem; }
+            .container { padding-top: 11.5rem; }
+            .preview-image-container { width: 150px; height: 150px; border-radius: 20px; }
+            .demo-loading-image-wrapper { width: 190px; height: 190px; border-radius: 20px; }
+            .result-box { padding: 1.5rem 1rem; }
+            .ai-line { font-size: 0.96rem; }
+            .ai-line.is-header { font-size: 1.15rem; }
+            .ai-line.is-sub-header { font-size: 1.02rem; }
+            .highlight-controls { padding: 0.3rem 0.6rem; gap: 0.4rem; }
+            .record-demo-btn, .reset-btn { padding: 0.5rem 1rem; font-size: 0.85rem; }
+        }
+
+        /* Short/landscape phones: loading image shouldn't overflow viewport height */
+        @media(max-height: 480px) and (orientation: landscape) {
+            .demo-loading-image-wrapper { width: 160px; height: 160px; margin-bottom: 1rem; }
+            .preview-image-container { width: 140px; height: 140px; }
+        }
+
+        /* Larger tablets/desktop touch-ups */
+        @media(min-width: 1024px) {
+            .container { max-width: 780px; }
         }
     </style>
 </head>
@@ -1233,8 +1272,13 @@
             resetContentForReplay();
             window.scrollTo({ top: 0, behavior: 'instant' });
 
+            // Fixed: previous check used a fragile string match against
+            // window.location.host. Now it just checks the image element is
+            // actually showing a real image (data URL or blob URL).
             const imgSrc = previewImage.src;
-            const hasImage = previewImage.style.display !== 'none' && imgSrc && !imgSrc.endsWith(window.location.host + '/');
+            const hasImage = previewImage.style.display !== 'none'
+                && imgSrc
+                && (imgSrc.startsWith('data:') || imgSrc.startsWith('blob:'));
 
             if (hasImage) {
                 demoLoadingImage.src = imgSrc;
