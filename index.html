@@ -26,12 +26,16 @@
             html { font-size: 10.5px; } 
         }
 
-        @media (max-width: 480px) {
-            html { font-size: 9.5px; } /* Crisp, zoomed-out mobile view */
+        /* Real phones (matches the same 600px threshold used elsewhere to
+           detect "this is a phone, not a tablet/desktop"). This must come
+           after the 768px rule so it wins on any width <= 600px, regardless
+           of the exact device width the phone reports. */
+        @media (max-width: 600px) {
+            html { font-size: 14.7px; }
         }
 
         @media (max-width: 380px) {
-            html { font-size: 8.5px; } 
+            html { font-size: 13.65px; }
         }
 
         :root {
@@ -142,6 +146,14 @@
             background: rgba(255, 255, 255, 0.05); padding: 0.25rem 0.35rem;
             border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0;
         }
+
+        /* On real phones there's no need for the desktop/9:16/3:4 size picker —
+           the page is already phone-shaped, so just hide it. This matches the
+           same 600px threshold the JS uses to decide "is this a phone". */
+        @media (max-width: 600px) {
+            .device-toggles { display: none !important; }
+        }
+
         .device-btn {
             background: transparent; border: none; color: rgba(255, 255, 255, 0.4);
             font-size: 0.95rem; cursor: pointer; width: 2rem; height: 2rem; border-radius: 50%;
@@ -348,23 +360,23 @@
             .container { padding: 8.5rem 1rem 3.5rem; }
             .demo-toolbar { flex-direction: column; gap: 0.6rem; padding-bottom: 0.8rem; }
         }
-        @media(max-width: 480px) {
+        @media(max-width: 600px) {
             h1 { font-size: 2rem; }
             .result-box { padding: 1.4rem 1.25rem; } 
             
             /* TINY IMAGE BUMP FOR MOBILE */
-            .preview-image-container { width: 10.25rem; height: 10.25rem; } 
+            .preview-image-container { width: 10.75rem; height: 10.75rem; } 
             
-            .demo-loading-image-wrapper { width: 12rem; height: 12rem; } 
+            .demo-loading-image-wrapper { width: 12.6rem; height: 12.6rem; } 
             .top-copy-btn { top: -0.9rem; right: 0.85rem; width: 1.85rem; height: 1.85rem; }
         }
         @media(max-width: 380px) {
             h1 { font-size: 1.85rem; }
             
             /* TINY IMAGE BUMP FOR SMALL MOBILE */
-            .preview-image-container { width: 9rem; height: 9rem; border-radius: 1rem; } 
+            .preview-image-container { width: 9.45rem; height: 9.45rem; border-radius: 1rem; } 
             
-            .demo-loading-image-wrapper { width: 10.5rem; height: 10.5rem; border-radius: 1rem; } 
+            .demo-loading-image-wrapper { width: 11.05rem; height: 11.05rem; border-radius: 1rem; } 
             .result-box { padding: 1.25rem 1.1rem; }
             .highlight-controls, .device-toggles { padding: 0.25rem 0.5rem; }
         }
@@ -501,6 +513,9 @@
             btn.addEventListener('click', () => setDeviceMode(btn.dataset.mode));
         });
 
+        // Only auto-apply the 9:16 phone-simulation frame on wider screens
+        // (desktop/iPad, used for recording). Real phones (<=600px) stay in
+        // "full" mode since they're already phone-shaped — no letterbox needed.
         if (window.innerWidth > 600) {
             setDeviceMode('mode-9-16');
         }
